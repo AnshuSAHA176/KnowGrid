@@ -1,18 +1,18 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
 from .custome_user_manager import CustomeUserManager
+from django.contrib.auth.models import PermissionsMixin
 
-
-class User(AbstractBaseUser):
+class User(AbstractBaseUser,PermissionsMixin):
 
     class RoleChoices(models.TextChoices):
-        user = "user", "User"
-        admin = "boss", "Boss"
+        USER = "user", "User"
+        BOSS = "boss", "Boss"
 
     objects = CustomeUserManager()
     email = models.EmailField(unique=True, max_length=300)
     user_name = None
-    role = models.CharField()
+    role = models.CharField(max_length=200,choices=RoleChoices.choices,default=RoleChoices.USER)
     REQUIRED_FIELDS = []
     USERNAME_FIELD = "email"
     is_active = models.BooleanField(default=True)
