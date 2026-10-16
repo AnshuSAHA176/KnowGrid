@@ -1,0 +1,5878 @@
+{
+  "metadata": {
+    "video_id": "84BBAGEu064",
+    "title": "Django ORM - QuerySet Filtering and Lookups / Ordering and Slicing QuerySets",
+    "channel": "BugBytes",
+    "description": "In this video, we'll dive into many topics, including how to filter QuerySets of records in Django, using the filter() and exclude() functions, and how to pass lookups such as \"gt\" (greater than), \"lt\" (less than), \"range\", \"in\", and \"startswith\".\n\nWe will see how these lookups translate to the underlying SQL, for example:\n* \"in\" = IN operator in SQL\n* \"range\" = BETWEEN operator \netc\n\nWe will also look at how to order QuerySets in Django, using the order_by() function, and using the model Meta class to define a default ordering. We'll also see how to apply the Lower database function in order to retrieve a case-insensitive ordering over character fields.\n\nWe'll see how to index/slice into QuerySets, how to use the get() function to retrieve a model, the exists() function to check for the existence of records in a QuerySet, and the earliest() and latest() functions to retrieve the earliest and latest objects using a date/datetime field.\n\nStarter Code: https://github.com/bugbytes-io/django-orm-series\n\n📌 𝗖𝗵𝗮𝗽𝘁𝗲𝗿𝘀:\n00:00 Intro\n01:09 Setup and management command\n04:51 Filtering QuerySets with filter() method \n07:39 Getting a single model back with the get() method\n10:03 Checking if QuerySet contains records with exists() method\n10:38 Multiple AND conditions with the filter() method\n13:24 Filtering QuerySets with the “in” lookup\n15:17 Filtering QuerySets with the exclude() method\n17:52 Filtering QuerySets with “lt” and “gt” lookups\n21:39 Filtering QuerySets with the range lookup\n22:52 Ordering QuerySets with the order_by() method\n26:15 Case-insensitive orderings with the Lower database function\n28:47 Ordering by date & datetime fields\n29:25 Indexing and Slicing into QuerySets - LIMIT and OFFSET SQL statements\n31:26 Adding ‘ordering’ field to model Meta class for default ordering\n33:23 ORM earliest() and latest() functions\n35:01 Meta class get_latest_by field\n35:55 Filtering by foreign key values in Django\n\n☕️ 𝗕𝘂𝘆 𝗺𝗲 𝗮 𝗰𝗼𝗳𝗳𝗲𝗲:\nTo support the channel and encourage new videos, please consider buying me a coffee here:\nhttps://ko-fi.com/bugbytes\n\n▶️ Full Playlist:\nhttps://www.youtube.com/playlist?list=PL-2EBeDYMIbTT7ri4pNEBu9VoVSAkOvd2\n\n𝗦𝗼𝗰𝗶𝗮𝗹 𝗠𝗲𝗱𝗶𝗮:\n📖 Blog: https://bugbytes.io/posts/\n👾 Github: https://github.com/bugbytes-io/django-orm-series\n\n📚 𝗙𝘂𝗿𝘁𝗵𝗲𝗿 𝗿𝗲𝗮𝗱𝗶𝗻𝗴 𝗮𝗻𝗱 𝗶𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻:\nGithub: https://github.com/bugbytes-io/django-orm-series\nDjango filter() function: https://docs.djangoproject.com/en/4.2/ref/models/querysets/#filter\nDjango get() function: https://docs.djangoproject.com/en/4.2/ref/models/querysets/#getDjango Field Lookups: https://docs.djangoproject.com/en/4.2/ref/models/querysets/#field-lookups\nDjango Lower function: https://docs.djangoproject.com/en/4.2/ref/models/database-functions/#lower\n\n#python #django #webdevelopment #database #sql",
+    "duration_seconds": 2378,
+    "thumbnail": "https://i.ytimg.com/vi_webp/84BBAGEu064/maxresdefault.webp",
+    "webpage_url": "https://www.youtube.com/watch?v=84BBAGEu064"
+  },
+  "transcript": [
+    {
+      "start": 0.0,
+      "duration": 4.08,
+      "text": "so far we've just been working with a"
+    },
+    {
+      "start": 1.979,
+      "duration": 3.541,
+      "text": "script and creating and deleting records"
+    },
+    {
+      "start": 4.08,
+      "duration": 2.819,
+      "text": "as we've been working through that"
+    },
+    {
+      "start": 5.52,
+      "duration": 3.3,
+      "text": "script in this video we're going to"
+    },
+    {
+      "start": 6.899,
+      "duration": 3.841,
+      "text": "create a repeatable data set using our"
+    },
+    {
+      "start": 8.82,
+      "duration": 3.96,
+      "text": "Django management command that we can"
+    },
+    {
+      "start": 10.74,
+      "duration": 3.899,
+      "text": "use in future videos and this is going"
+    },
+    {
+      "start": 12.78,
+      "duration": 4.499,
+      "text": "to allow us to delve deeper into some of"
+    },
+    {
+      "start": 14.639,
+      "duration": 4.021,
+      "text": "the concepts in Django's orm and as well"
+    },
+    {
+      "start": 17.279,
+      "duration": 2.58,
+      "text": "as creating that command what we're"
+    },
+    {
+      "start": 18.66,
+      "duration": 2.94,
+      "text": "going to do in this video is dive"
+    },
+    {
+      "start": 19.859,
+      "duration": 3.601,
+      "text": "further into the filter and exclude"
+    },
+    {
+      "start": 21.6,
+      "duration": 3.839,
+      "text": "statements in Django these can be used"
+    },
+    {
+      "start": 23.46,
+      "duration": 3.54,
+      "text": "to control and filter the results that"
+    },
+    {
+      "start": 25.439,
+      "duration": 3.6,
+      "text": "you're getting back from the database"
+    },
+    {
+      "start": 27.0,
+      "duration": 3.66,
+      "text": "based on conditions we're also going to"
+    },
+    {
+      "start": 29.039,
+      "duration": 3.601,
+      "text": "look at the order by statement to"
+    },
+    {
+      "start": 30.66,
+      "duration": 3.3,
+      "text": "control the ordering of a query set of"
+    },
+    {
+      "start": 32.64,
+      "duration": 3.0,
+      "text": "models and we're going to look at the"
+    },
+    {
+      "start": 33.96,
+      "duration": 3.3,
+      "text": "exists function as well which is a"
+    },
+    {
+      "start": 35.64,
+      "duration": 3.84,
+      "text": "Boolean function that returns whether or"
+    },
+    {
+      "start": 37.26,
+      "duration": 3.959,
+      "text": "not any models meet the conditions that"
+    },
+    {
+      "start": 39.48,
+      "duration": 2.94,
+      "text": "you specify and finally we're going to"
+    },
+    {
+      "start": 41.219,
+      "duration": 3.0,
+      "text": "look at the earliest and latest"
+    },
+    {
+      "start": 42.42,
+      "duration": 3.959,
+      "text": "functions that can be used with date"
+    },
+    {
+      "start": 44.219,
+      "duration": 3.36,
+      "text": "time fields in your Django models and"
+    },
+    {
+      "start": 46.379,
+      "duration": 3.0,
+      "text": "we're also going to dive further into"
+    },
+    {
+      "start": 47.579,
+      "duration": 3.96,
+      "text": "lookups in this video for example the"
+    },
+    {
+      "start": 49.379,
+      "duration": 3.84,
+      "text": "greater than and less than lookups the"
+    },
+    {
+      "start": 51.539,
+      "duration": 3.961,
+      "text": "range lookup that can be used to see if"
+    },
+    {
+      "start": 53.219,
+      "duration": 4.081,
+      "text": "a values between the two boundaries and"
+    },
+    {
+      "start": 55.5,
+      "duration": 3.539,
+      "text": "we're going to see the N lookup as well"
+    },
+    {
+      "start": 57.3,
+      "duration": 4.38,
+      "text": "which can be used to check if a"
+    },
+    {
+      "start": 59.039,
+      "duration": 4.741,
+      "text": "particular field has a value that's in a"
+    },
+    {
+      "start": 61.68,
+      "duration": 3.42,
+      "text": "predefined set of values and we'll look"
+    },
+    {
+      "start": 63.78,
+      "duration": 2.82,
+      "text": "at some other things in this video it's"
+    },
+    {
+      "start": 65.1,
+      "duration": 3.12,
+      "text": "going to be quite a comprehensive video"
+    },
+    {
+      "start": 66.6,
+      "duration": 3.12,
+      "text": "on some of these topics so let's get"
+    },
+    {
+      "start": 68.22,
+      "duration": 3.719,
+      "text": "started now I've created a GitHub"
+    },
+    {
+      "start": 69.72,
+      "duration": 3.48,
+      "text": "repository for the orm series I'm going"
+    },
+    {
+      "start": 71.939,
+      "duration": 3.121,
+      "text": "to commit some of the code that we're"
+    },
+    {
+      "start": 73.2,
+      "duration": 3.9,
+      "text": "going to work on to this repository in"
+    },
+    {
+      "start": 75.06,
+      "duration": 4.02,
+      "text": "the future but I've put up the starter"
+    },
+    {
+      "start": 77.1,
+      "duration": 4.26,
+      "text": "code that now contains in the core"
+    },
+    {
+      "start": 79.08,
+      "duration": 4.5,
+      "text": "project and management slash commands"
+    },
+    {
+      "start": 81.36,
+      "duration": 5.28,
+      "text": "folder and within this folder we have a"
+    },
+    {
+      "start": 83.58,
+      "duration": 4.74,
+      "text": "python script called create data.pi now"
+    },
+    {
+      "start": 86.64,
+      "duration": 3.24,
+      "text": "all the other codes in this repository"
+    },
+    {
+      "start": 88.32,
+      "duration": 3.24,
+      "text": "is just the same code that we've been"
+    },
+    {
+      "start": 89.88,
+      "duration": 3.86,
+      "text": "looking at throughout this tutorial"
+    },
+    {
+      "start": 91.56,
+      "duration": 4.8,
+      "text": "series but I have added this create"
+    },
+    {
+      "start": 93.74,
+      "duration": 4.3,
+      "text": "data.pi script so if we go to vs code"
+    },
+    {
+      "start": 96.36,
+      "duration": 3.719,
+      "text": "what I'm going to do is go to that"
+    },
+    {
+      "start": 98.04,
+      "duration": 4.619,
+      "text": "create data script this is a Django"
+    },
+    {
+      "start": 100.079,
+      "duration": 4.801,
+      "text": "management command so it extends the"
+    },
+    {
+      "start": 102.659,
+      "duration": 4.021,
+      "text": "base command class and that has a handle"
+    },
+    {
+      "start": 104.88,
+      "duration": 3.54,
+      "text": "function so let's very quickly go over"
+    },
+    {
+      "start": 106.68,
+      "duration": 3.42,
+      "text": "what's going on in this function and"
+    },
+    {
+      "start": 108.42,
+      "duration": 3.479,
+      "text": "remember you can clone this directly"
+    },
+    {
+      "start": 110.1,
+      "duration": 3.659,
+      "text": "from the repository and follow along"
+    },
+    {
+      "start": 111.899,
+      "duration": 4.441,
+      "text": "with the video so we're looking here for"
+    },
+    {
+      "start": 113.759,
+      "duration": 4.081,
+      "text": "a user with a username of admin in the"
+    },
+    {
+      "start": 116.34,
+      "duration": 3.54,
+      "text": "database we're going to check whether or"
+    },
+    {
+      "start": 117.84,
+      "duration": 4.62,
+      "text": "not that user exists and if they don't"
+    },
+    {
+      "start": 119.88,
+      "duration": 4.8,
+      "text": "success we are creating that super user"
+    },
+    {
+      "start": 122.46,
+      "duration": 4.199,
+      "text": "with the username of admin and a"
+    },
+    {
+      "start": 124.68,
+      "duration": 3.719,
+      "text": "password that we're just setting to test"
+    },
+    {
+      "start": 126.659,
+      "duration": 4.08,
+      "text": "here so we're getting the user within"
+    },
+    {
+      "start": 128.399,
+      "duration": 3.541,
+      "text": "this if and else statement here and by"
+    },
+    {
+      "start": 130.739,
+      "duration": 2.761,
+      "text": "the way if you're not interested in"
+    },
+    {
+      "start": 131.94,
+      "duration": 3.24,
+      "text": "looking at the management command then"
+    },
+    {
+      "start": 133.5,
+      "duration": 3.72,
+      "text": "you can skip to the next section of the"
+    },
+    {
+      "start": 135.18,
+      "duration": 4.199,
+      "text": "video below that we have a list of"
+    },
+    {
+      "start": 137.22,
+      "duration": 3.599,
+      "text": "restaurants and each element in that"
+    },
+    {
+      "start": 139.379,
+      "duration": 3.601,
+      "text": "list is a python dictionary that"
+    },
+    {
+      "start": 140.819,
+      "duration": 4.081,
+      "text": "contains values for the fields that are"
+    },
+    {
+      "start": 142.98,
+      "duration": 3.42,
+      "text": "defined on a restaurant model if we"
+    },
+    {
+      "start": 144.9,
+      "duration": 3.78,
+      "text": "scroll down you can see that what we're"
+    },
+    {
+      "start": 146.4,
+      "duration": 3.78,
+      "text": "doing in this script is deleting all the"
+    },
+    {
+      "start": 148.68,
+      "duration": 3.66,
+      "text": "existing restaurants from the database"
+    },
+    {
+      "start": 150.18,
+      "duration": 4.76,
+      "text": "and then We're looping over that list of"
+    },
+    {
+      "start": 152.34,
+      "duration": 4.259,
+      "text": "dictionaries and we're using the"
+    },
+    {
+      "start": 154.94,
+      "duration": 3.7,
+      "text": "restaurant.objects.createfunction and"
+    },
+    {
+      "start": 156.599,
+      "duration": 4.441,
+      "text": "unpacking the dictionary of key value"
+    },
+    {
+      "start": 158.64,
+      "duration": 4.5,
+      "text": "pairs into that create function so that"
+    },
+    {
+      "start": 161.04,
+      "duration": 3.9,
+      "text": "will enter our value into the database"
+    },
+    {
+      "start": 163.14,
+      "duration": 3.48,
+      "text": "for each element in this list of"
+    },
+    {
+      "start": 164.94,
+      "duration": 2.879,
+      "text": "dictionaries and then below that what"
+    },
+    {
+      "start": 166.62,
+      "duration": 3.0,
+      "text": "we're doing is we're creating some"
+    },
+    {
+      "start": 167.819,
+      "duration": 4.2,
+      "text": "ratings so I've got a hard-coded value"
+    },
+    {
+      "start": 169.62,
+      "duration": 3.78,
+      "text": "of 30 here and feel free to change any"
+    },
+    {
+      "start": 172.019,
+      "duration": 4.021,
+      "text": "of these if you want so we're creating"
+    },
+    {
+      "start": 173.4,
+      "duration": 5.4,
+      "text": "30 ratings and we are using the"
+    },
+    {
+      "start": 176.04,
+      "duration": 4.8,
+      "text": "random.choice function in Python to"
+    },
+    {
+      "start": 178.8,
+      "duration": 3.9,
+      "text": "choose a particular rest restaurant from"
+    },
+    {
+      "start": 180.84,
+      "duration": 3.78,
+      "text": "the query set of restaurants so this is"
+    },
+    {
+      "start": 182.7,
+      "duration": 3.6,
+      "text": "a rating that will be applied randomly"
+    },
+    {
+      "start": 184.62,
+      "duration": 3.839,
+      "text": "to one of the restaurants and finally"
+    },
+    {
+      "start": 186.3,
+      "duration": 4.439,
+      "text": "below that we are also creating 100"
+    },
+    {
+      "start": 188.459,
+      "duration": 4.381,
+      "text": "sales in the database and again we're"
+    },
+    {
+      "start": 190.739,
+      "duration": 3.841,
+      "text": "using random.choice here to select the"
+    },
+    {
+      "start": 192.84,
+      "duration": 3.66,
+      "text": "restaurant and for the income generated"
+    },
+    {
+      "start": 194.58,
+      "duration": 5.4,
+      "text": "from that sale we are generating"
+    },
+    {
+      "start": 196.5,
+      "duration": 5.159,
+      "text": "uniformly a number between 5 and 100 and"
+    },
+    {
+      "start": 199.98,
+      "duration": 3.42,
+      "text": "I should say as well above that the"
+    },
+    {
+      "start": 201.659,
+      "duration": 4.021,
+      "text": "rating that we have here we are applying"
+    },
+    {
+      "start": 203.4,
+      "duration": 3.9,
+      "text": "a random integer between one and five"
+    },
+    {
+      "start": 205.68,
+      "duration": 3.12,
+      "text": "for that rating so this is the"
+    },
+    {
+      "start": 207.3,
+      "duration": 4.14,
+      "text": "management script and we can run this"
+    },
+    {
+      "start": 208.8,
+      "duration": 4.439,
+      "text": "with the python manage.pi and we can"
+    },
+    {
+      "start": 211.44,
+      "duration": 4.019,
+      "text": "give it the name of the script which is"
+    },
+    {
+      "start": 213.239,
+      "duration": 4.381,
+      "text": "create data that's going to then run"
+    },
+    {
+      "start": 215.459,
+      "duration": 4.56,
+      "text": "this and add these objects to the"
+    },
+    {
+      "start": 217.62,
+      "duration": 3.899,
+      "text": "database for restaurants for ratings and"
+    },
+    {
+      "start": 220.019,
+      "duration": 3.241,
+      "text": "for sales now what we're going to do is"
+    },
+    {
+      "start": 221.519,
+      "duration": 4.28,
+      "text": "verify that this has worked by going to"
+    },
+    {
+      "start": 223.26,
+      "duration": 4.74,
+      "text": "our scripts directory and the orm"
+    },
+    {
+      "start": 225.799,
+      "duration": 3.761,
+      "text": "script.pi file this is a script that"
+    },
+    {
+      "start": 228.0,
+      "duration": 3.48,
+      "text": "we're running with the Django extensions"
+    },
+    {
+      "start": 229.56,
+      "duration": 3.599,
+      "text": "run script command what we're going to"
+    },
+    {
+      "start": 231.48,
+      "duration": 5.479,
+      "text": "do is we're going to print to the"
+    },
+    {
+      "start": 233.159,
+      "duration": 5.701,
+      "text": "terminal here the result of executing"
+    },
+    {
+      "start": 236.959,
+      "duration": 3.221,
+      "text": "restaurant.objects.count and as well as"
+    },
+    {
+      "start": 238.86,
+      "duration": 3.18,
+      "text": "a number of restaurants I'm going to"
+    },
+    {
+      "start": 240.18,
+      "duration": 3.0,
+      "text": "paste in these two commands here and"
+    },
+    {
+      "start": 242.04,
+      "duration": 3.059,
+      "text": "we're going to also get the number of"
+    },
+    {
+      "start": 243.18,
+      "duration": 3.96,
+      "text": "ratings and the number of sales in the"
+    },
+    {
+      "start": 245.099,
+      "duration": 5.041,
+      "text": "database table so let's execute this"
+    },
+    {
+      "start": 247.14,
+      "duration": 4.739,
+      "text": "with python manage.pi and we use the Run"
+    },
+    {
+      "start": 250.14,
+      "duration": 3.78,
+      "text": "script command and the name of this is"
+    },
+    {
+      "start": 251.879,
+      "duration": 3.961,
+      "text": "orm script and below here you can see"
+    },
+    {
+      "start": 253.92,
+      "duration": 4.14,
+      "text": "the raw numbers coming from these"
+    },
+    {
+      "start": 255.84,
+      "duration": 5.399,
+      "text": "commands we have 14 restaurants 30"
+    },
+    {
+      "start": 258.06,
+      "duration": 5.1,
+      "text": "ratings and 100 sales in the database so"
+    },
+    {
+      "start": 261.239,
+      "duration": 4.02,
+      "text": "these match the values that we had hard"
+    },
+    {
+      "start": 263.16,
+      "duration": 4.56,
+      "text": "coded here and for example this for Loop"
+    },
+    {
+      "start": 265.259,
+      "duration": 4.021,
+      "text": "for the ratings 30 and 100 so these have"
+    },
+    {
+      "start": 267.72,
+      "duration": 3.12,
+      "text": "been successfully entered into the"
+    },
+    {
+      "start": 269.28,
+      "duration": 3.72,
+      "text": "database when we run that management"
+    },
+    {
+      "start": 270.84,
+      "duration": 3.72,
+      "text": "command so now we have data in the"
+    },
+    {
+      "start": 273.0,
+      "duration": 4.02,
+      "text": "database let's learn a bit more about"
+    },
+    {
+      "start": 274.56,
+      "duration": 4.5,
+      "text": "querying that database using Django now"
+    },
+    {
+      "start": 277.02,
+      "duration": 4.02,
+      "text": "we've already seen methods such as the"
+    },
+    {
+      "start": 279.06,
+      "duration": 4.199,
+      "text": "dot count method that gets the number of"
+    },
+    {
+      "start": 281.04,
+      "duration": 4.08,
+      "text": "rows in the database table and we've"
+    },
+    {
+      "start": 283.259,
+      "duration": 3.961,
+      "text": "seen other methods such as dot all to"
+    },
+    {
+      "start": 285.12,
+      "duration": 4.019,
+      "text": "get all of the rows and the first and"
+    },
+    {
+      "start": 287.22,
+      "duration": 3.96,
+      "text": "last methods to get the first record and"
+    },
+    {
+      "start": 289.139,
+      "duration": 3.901,
+      "text": "the last record in the table we're now"
+    },
+    {
+      "start": 291.18,
+      "duration": 4.14,
+      "text": "going to expand on our knowledge of the"
+    },
+    {
+      "start": 293.04,
+      "duration": 3.48,
+      "text": "filter and exclude functions in Django"
+    },
+    {
+      "start": 295.32,
+      "duration": 2.7,
+      "text": "and while we're working with these"
+    },
+    {
+      "start": 296.52,
+      "duration": 3.959,
+      "text": "functions we're going to also dive"
+    },
+    {
+      "start": 298.02,
+      "duration": 4.38,
+      "text": "further into lookups in Jan angle that"
+    },
+    {
+      "start": 300.479,
+      "duration": 4.141,
+      "text": "allow you to customize the where Clause"
+    },
+    {
+      "start": 302.4,
+      "duration": 4.079,
+      "text": "of an SQL query so let's clear these"
+    },
+    {
+      "start": 304.62,
+      "duration": 3.299,
+      "text": "print statements from the terminal I'm"
+    },
+    {
+      "start": 306.479,
+      "duration": 2.821,
+      "text": "going to remove this comment and replace"
+    },
+    {
+      "start": 307.919,
+      "duration": 3.601,
+      "text": "it with another one what we're going to"
+    },
+    {
+      "start": 309.3,
+      "duration": 4.44,
+      "text": "do is filter down to only the Chinese"
+    },
+    {
+      "start": 311.52,
+      "duration": 3.54,
+      "text": "restaurants and the data so let's write"
+    },
+    {
+      "start": 313.74,
+      "duration": 2.42,
+      "text": "that statement here below it's going to"
+    },
+    {
+      "start": 315.06,
+      "duration": 2.52,
+      "text": "be"
+    },
+    {
+      "start": 316.16,
+      "duration": 3.099,
+      "text": "restaurant.objects.filter and we're"
+    },
+    {
+      "start": 317.58,
+      "duration": 3.059,
+      "text": "going to filter on the restaurant type"
+    },
+    {
+      "start": 319.259,
+      "duration": 4.141,
+      "text": "field and we're going to set that equal"
+    },
+    {
+      "start": 320.639,
+      "duration": 5.641,
+      "text": "to the restaurant.type choices dot"
+    },
+    {
+      "start": 323.4,
+      "duration": 5.34,
+      "text": "Chinese value remember type choices is"
+    },
+    {
+      "start": 326.28,
+      "duration": 4.74,
+      "text": "our text choices class in Django that"
+    },
+    {
+      "start": 328.74,
+      "duration": 3.72,
+      "text": "defines some values that we can use in"
+    },
+    {
+      "start": 331.02,
+      "duration": 3.179,
+      "text": "the restaurant type field so if we"
+    },
+    {
+      "start": 332.46,
+      "duration": 4.2,
+      "text": "scroll up here to the restaurant model"
+    },
+    {
+      "start": 334.199,
+      "duration": 3.901,
+      "text": "we have our type choices class and we"
+    },
+    {
+      "start": 336.66,
+      "duration": 3.599,
+      "text": "can see some of these values this is"
+    },
+    {
+      "start": 338.1,
+      "duration": 4.56,
+      "text": "very similar to an enum it contains some"
+    },
+    {
+      "start": 340.259,
+      "duration": 4.44,
+      "text": "predefined values such as Chinese here"
+    },
+    {
+      "start": 342.66,
+      "duration": 3.9,
+      "text": "in this case and we are going to search"
+    },
+    {
+      "start": 344.699,
+      "duration": 3.901,
+      "text": "for that when we use the filter command"
+    },
+    {
+      "start": 346.56,
+      "duration": 3.96,
+      "text": "and we'll be past the restaurant type in"
+    },
+    {
+      "start": 348.6,
+      "duration": 4.02,
+      "text": "here as a Chinese restaurant so let's"
+    },
+    {
+      "start": 350.52,
+      "duration": 3.72,
+      "text": "print this to the terminal and then we"
+    },
+    {
+      "start": 352.62,
+      "duration": 3.419,
+      "text": "can execute the script and we're running"
+    },
+    {
+      "start": 354.24,
+      "duration": 3.899,
+      "text": "that script below here and you can see"
+    },
+    {
+      "start": 356.039,
+      "duration": 4.561,
+      "text": "the query set coming back with three"
+    },
+    {
+      "start": 358.139,
+      "duration": 4.321,
+      "text": "restaurants in that database stable that"
+    },
+    {
+      "start": 360.6,
+      "duration": 3.36,
+      "text": "are Chinese restaurants and if we look"
+    },
+    {
+      "start": 362.46,
+      "duration": 3.12,
+      "text": "at the query that's being executed here"
+    },
+    {
+      "start": 363.96,
+      "duration": 3.54,
+      "text": "and you can see that there is a where"
+    },
+    {
+      "start": 365.58,
+      "duration": 3.839,
+      "text": "Clause here and we're filtering down to"
+    },
+    {
+      "start": 367.5,
+      "duration": 4.62,
+      "text": "where the restaurant type is equal to"
+    },
+    {
+      "start": 369.419,
+      "duration": 4.921,
+      "text": "Chinese in this case that's defined by"
+    },
+    {
+      "start": 372.12,
+      "duration": 4.32,
+      "text": "this CH value that we're storing in the"
+    },
+    {
+      "start": 374.34,
+      "duration": 4.139,
+      "text": "database so what the filter statement"
+    },
+    {
+      "start": 376.44,
+      "duration": 4.02,
+      "text": "does that we're running here is it takes"
+    },
+    {
+      "start": 378.479,
+      "duration": 4.021,
+      "text": "the keyword argument that represents one"
+    },
+    {
+      "start": 380.46,
+      "duration": 4.5,
+      "text": "of the columns in the database table and"
+    },
+    {
+      "start": 382.5,
+      "duration": 4.38,
+      "text": "the value we pass in after that is what"
+    },
+    {
+      "start": 384.96,
+      "duration": 3.84,
+      "text": "is searched for in the database and"
+    },
+    {
+      "start": 386.88,
+      "duration": 4.08,
+      "text": "that's searched by doing an equality"
+    },
+    {
+      "start": 388.8,
+      "duration": 4.5,
+      "text": "here so we're checking an exact value"
+    },
+    {
+      "start": 390.96,
+      "duration": 4.859,
+      "text": "that's passed in whether that particular"
+    },
+    {
+      "start": 393.3,
+      "duration": 4.32,
+      "text": "column has records that match that exact"
+    },
+    {
+      "start": 395.819,
+      "duration": 4.081,
+      "text": "value and then returning them to the"
+    },
+    {
+      "start": 397.62,
+      "duration": 4.079,
+      "text": "color now let's see another way to do"
+    },
+    {
+      "start": 399.9,
+      "duration": 3.96,
+      "text": "this for example we might want to check"
+    },
+    {
+      "start": 401.699,
+      "duration": 3.421,
+      "text": "for a restaurant with a given name so"
+    },
+    {
+      "start": 403.86,
+      "duration": 3.899,
+      "text": "the field that we're going to use here"
+    },
+    {
+      "start": 405.12,
+      "duration": 5.1,
+      "text": "is now name not restaurant type and the"
+    },
+    {
+      "start": 407.759,
+      "duration": 3.841,
+      "text": "value we can remove the enum value and"
+    },
+    {
+      "start": 410.22,
+      "duration": 3.96,
+      "text": "let's say we're searching for a"
+    },
+    {
+      "start": 411.6,
+      "duration": 4.56,
+      "text": "restaurant called Pizzeria one let's now"
+    },
+    {
+      "start": 414.18,
+      "duration": 3.48,
+      "text": "execute this query again and we can see"
+    },
+    {
+      "start": 416.16,
+      "duration": 3.18,
+      "text": "the result and you can see the where"
+    },
+    {
+      "start": 417.66,
+      "duration": 3.9,
+      "text": "Clause again at the bottom we're"
+    },
+    {
+      "start": 419.34,
+      "duration": 4.56,
+      "text": "checking if the name is equal to what"
+    },
+    {
+      "start": 421.56,
+      "duration": 4.259,
+      "text": "we've passed in as the value of this"
+    },
+    {
+      "start": 423.9,
+      "duration": 3.6,
+      "text": "keyword argument so Django is taking"
+    },
+    {
+      "start": 425.819,
+      "duration": 3.421,
+      "text": "these keyword arguments that we're"
+    },
+    {
+      "start": 427.5,
+      "duration": 3.9,
+      "text": "passing to the filter statement and it's"
+    },
+    {
+      "start": 429.24,
+      "duration": 4.019,
+      "text": "converting them into where Clause"
+    },
+    {
+      "start": 431.4,
+      "duration": 3.84,
+      "text": "statements that are used in the SQL to"
+    },
+    {
+      "start": 433.259,
+      "duration": 3.66,
+      "text": "get the right results back to the caller"
+    },
+    {
+      "start": 435.24,
+      "duration": 3.78,
+      "text": "so what I'm going to do is store this in"
+    },
+    {
+      "start": 436.919,
+      "duration": 3.541,
+      "text": "a value called restaurant this is just a"
+    },
+    {
+      "start": 439.02,
+      "duration": 2.54,
+      "text": "variable and what we're going to do is"
+    },
+    {
+      "start": 440.46,
+      "duration": 3.359,
+      "text": "we're going to print out the"
+    },
+    {
+      "start": 441.56,
+      "duration": 4.0,
+      "text": "restaurant.count function and of course"
+    },
+    {
+      "start": 443.819,
+      "duration": 3.901,
+      "text": "we expect this to equal one because"
+    },
+    {
+      "start": 445.56,
+      "duration": 4.5,
+      "text": "there's only one restaurant in the table"
+    },
+    {
+      "start": 447.72,
+      "duration": 4.08,
+      "text": "that has that exact name called Pizzeria"
+    },
+    {
+      "start": 450.06,
+      "duration": 4.079,
+      "text": "one and the dot count function is"
+    },
+    {
+      "start": 451.8,
+      "duration": 4.679,
+      "text": "defined on a query set in Django and a"
+    },
+    {
+      "start": 454.139,
+      "duration": 4.141,
+      "text": "query set represents a list of models"
+    },
+    {
+      "start": 456.479,
+      "duration": 4.021,
+      "text": "that you have coming back from the"
+    },
+    {
+      "start": 458.28,
+      "duration": 4.44,
+      "text": "database now if you only have one model"
+    },
+    {
+      "start": 460.5,
+      "duration": 4.5,
+      "text": "you might want to just get the value of"
+    },
+    {
+      "start": 462.72,
+      "duration": 4.919,
+      "text": "that directly as a Django model class"
+    },
+    {
+      "start": 465.0,
+      "duration": 4.8,
+      "text": "rather than having it as a query set so"
+    },
+    {
+      "start": 467.639,
+      "duration": 3.721,
+      "text": "if we remove the call to dot count we"
+    },
+    {
+      "start": 469.8,
+      "duration": 3.06,
+      "text": "are just going to print out a query set"
+    },
+    {
+      "start": 471.36,
+      "duration": 3.959,
+      "text": "in djangle but what we can do is also"
+    },
+    {
+      "start": 472.86,
+      "duration": 4.5,
+      "text": "call a function called dot get and that"
+    },
+    {
+      "start": 475.319,
+      "duration": 3.841,
+      "text": "is going to attempt to retrieve the"
+    },
+    {
+      "start": 477.36,
+      "duration": 4.8,
+      "text": "value from the query set as a Django"
+    },
+    {
+      "start": 479.16,
+      "duration": 4.979,
+      "text": "model now will only work if you have one"
+    },
+    {
+      "start": 482.16,
+      "duration": 4.02,
+      "text": "model in your query set only so let's"
+    },
+    {
+      "start": 484.139,
+      "duration": 3.96,
+      "text": "comment out the connection.quaries we're"
+    },
+    {
+      "start": 486.18,
+      "duration": 3.6,
+      "text": "not interested in the SQL here and we're"
+    },
+    {
+      "start": 488.099,
+      "duration": 4.44,
+      "text": "going to rerun the script and you can"
+    },
+    {
+      "start": 489.78,
+      "duration": 4.62,
+      "text": "see the two outputs on the top we have a"
+    },
+    {
+      "start": 492.539,
+      "duration": 4.141,
+      "text": "query set containing a single restaurant"
+    },
+    {
+      "start": 494.4,
+      "duration": 4.62,
+      "text": "with the name that we've passed in and"
+    },
+    {
+      "start": 496.68,
+      "duration": 4.56,
+      "text": "when we call the dot get function we are"
+    },
+    {
+      "start": 499.02,
+      "duration": 4.44,
+      "text": "converting that query set to a single"
+    },
+    {
+      "start": 501.24,
+      "duration": 4.62,
+      "text": "Django model now we can actually do this"
+    },
+    {
+      "start": 503.46,
+      "duration": 5.22,
+      "text": "on one line of code if we change the dot"
+    },
+    {
+      "start": 505.86,
+      "duration": 4.44,
+      "text": "filter function to dot get then when we"
+    },
+    {
+      "start": 508.68,
+      "duration": 3.12,
+      "text": "print the restaurant to the terminal"
+    },
+    {
+      "start": 510.3,
+      "duration": 3.78,
+      "text": "we're going to see that that's a Django"
+    },
+    {
+      "start": 511.8,
+      "duration": 3.659,
+      "text": "model instance it's not a query set but"
+    },
+    {
+      "start": 514.08,
+      "duration": 3.54,
+      "text": "you have to be careful when you're using"
+    },
+    {
+      "start": 515.459,
+      "duration": 4.26,
+      "text": "don't get this is a function that should"
+    },
+    {
+      "start": 517.62,
+      "duration": 4.5,
+      "text": "return only a single Row from the"
+    },
+    {
+      "start": 519.719,
+      "duration": 4.801,
+      "text": "database that is then converted into a"
+    },
+    {
+      "start": 522.12,
+      "duration": 4.38,
+      "text": "Django model on the application layer so"
+    },
+    {
+      "start": 524.52,
+      "duration": 4.02,
+      "text": "if you pass in parameters to the dot get"
+    },
+    {
+      "start": 526.5,
+      "duration": 3.72,
+      "text": "function that will return more than one"
+    },
+    {
+      "start": 528.54,
+      "duration": 3.299,
+      "text": "row from the database that's actually"
+    },
+    {
+      "start": 530.22,
+      "duration": 3.119,
+      "text": "going to cause an error in your"
+    },
+    {
+      "start": 531.839,
+      "duration": 3.361,
+      "text": "application that you're then going to"
+    },
+    {
+      "start": 533.339,
+      "duration": 4.141,
+      "text": "need to handle so let's go to database"
+    },
+    {
+      "start": 535.2,
+      "duration": 3.9,
+      "text": "browser for SQL Lite here and you can"
+    },
+    {
+      "start": 537.48,
+      "duration": 3.72,
+      "text": "see for the restaurant type we have"
+    },
+    {
+      "start": 539.1,
+      "duration": 4.2,
+      "text": "multiple for restaurants for all of"
+    },
+    {
+      "start": 541.2,
+      "duration": 4.319,
+      "text": "these and we have I think it's five or"
+    },
+    {
+      "start": 543.3,
+      "duration": 4.26,
+      "text": "six Italian restaurants here so if we"
+    },
+    {
+      "start": 545.519,
+      "duration": 3.361,
+      "text": "then pass a parameter to don't get here"
+    },
+    {
+      "start": 547.56,
+      "duration": 3.42,
+      "text": "that's going to return the Italian"
+    },
+    {
+      "start": 548.88,
+      "duration": 3.72,
+      "text": "restaurants we would need to remove this"
+    },
+    {
+      "start": 550.98,
+      "duration": 3.78,
+      "text": "and change the field that we're looking"
+    },
+    {
+      "start": 552.6,
+      "duration": 4.38,
+      "text": "at to restaurant type and we can set"
+    },
+    {
+      "start": 554.76,
+      "duration": 3.84,
+      "text": "that equal to Italian but we're passing"
+    },
+    {
+      "start": 556.98,
+      "duration": 3.84,
+      "text": "this to the dot gate function which"
+    },
+    {
+      "start": 558.6,
+      "duration": 4.02,
+      "text": "should return only a single row and this"
+    },
+    {
+      "start": 560.82,
+      "duration": 3.78,
+      "text": "particular query is going to return more"
+    },
+    {
+      "start": 562.62,
+      "duration": 3.899,
+      "text": "than one row so when we try to execute"
+    },
+    {
+      "start": 564.6,
+      "duration": 3.66,
+      "text": "the script you can see the error at the"
+    },
+    {
+      "start": 566.519,
+      "duration": 4.201,
+      "text": "bottom we have an error saying that"
+    },
+    {
+      "start": 568.26,
+      "duration": 4.139,
+      "text": "multiple objects are being returned and"
+    },
+    {
+      "start": 570.72,
+      "duration": 3.48,
+      "text": "that error is telling us that the dot"
+    },
+    {
+      "start": 572.399,
+      "duration": 3.721,
+      "text": "get function returned more than one"
+    },
+    {
+      "start": 574.2,
+      "duration": 4.139,
+      "text": "restaurant it returned five restaurants"
+    },
+    {
+      "start": 576.12,
+      "duration": 3.899,
+      "text": "from the database therefore you need to"
+    },
+    {
+      "start": 578.339,
+      "duration": 4.081,
+      "text": "be careful when you are using dot get"
+    },
+    {
+      "start": 580.019,
+      "duration": 4.081,
+      "text": "this should return exactly one model to"
+    },
+    {
+      "start": 582.42,
+      "duration": 4.02,
+      "text": "your application so if it returns more"
+    },
+    {
+      "start": 584.1,
+      "duration": 4.2,
+      "text": "than one or if it returns no models then"
+    },
+    {
+      "start": 586.44,
+      "duration": 3.899,
+      "text": "this is going to fail so let's go back"
+    },
+    {
+      "start": 588.3,
+      "duration": 3.539,
+      "text": "to the dot filter function here and"
+    },
+    {
+      "start": 590.339,
+      "duration": 3.12,
+      "text": "we're going to get back these Italian"
+    },
+    {
+      "start": 591.839,
+      "duration": 3.601,
+      "text": "restaurants and we'll be print this to"
+    },
+    {
+      "start": 593.459,
+      "duration": 4.141,
+      "text": "the terminal we can see the query set"
+    },
+    {
+      "start": 595.44,
+      "duration": 3.959,
+      "text": "coming back and this query set contains"
+    },
+    {
+      "start": 597.6,
+      "duration": 4.56,
+      "text": "all of the rows that have Italian"
+    },
+    {
+      "start": 599.399,
+      "duration": 4.56,
+      "text": "restaurants converted into jungle models"
+    },
+    {
+      "start": 602.16,
+      "duration": 4.02,
+      "text": "now you can check in a query set whether"
+    },
+    {
+      "start": 603.959,
+      "duration": 4.5,
+      "text": "or not any rows have been returned by"
+    },
+    {
+      "start": 606.18,
+      "duration": 4.62,
+      "text": "chaining the door exists function onto"
+    },
+    {
+      "start": 608.459,
+      "duration": 5.221,
+      "text": "that query set that will return true or"
+    },
+    {
+      "start": 610.8,
+      "duration": 4.92,
+      "text": "false it will turn true if any rows are"
+    },
+    {
+      "start": 613.68,
+      "duration": 3.48,
+      "text": "matched by the query otherwise if we"
+    },
+    {
+      "start": 615.72,
+      "duration": 3.54,
+      "text": "have no rules that match it's going to"
+    },
+    {
+      "start": 617.16,
+      "duration": 3.6,
+      "text": "return false so if we execute this"
+    },
+    {
+      "start": 619.26,
+      "duration": 3.48,
+      "text": "script you can see we are getting back"
+    },
+    {
+      "start": 620.76,
+      "duration": 4.079,
+      "text": "true here because there are Italian"
+    },
+    {
+      "start": 622.74,
+      "duration": 4.32,
+      "text": "restaurants in the database but if we"
+    },
+    {
+      "start": 624.839,
+      "duration": 4.44,
+      "text": "change the filter here and put in some"
+    },
+    {
+      "start": 627.06,
+      "duration": 3.959,
+      "text": "random nonsense for the name when we run"
+    },
+    {
+      "start": 629.279,
+      "duration": 3.18,
+      "text": "the script again we're going to get back"
+    },
+    {
+      "start": 631.019,
+      "duration": 4.201,
+      "text": "false because we don't have a restaurant"
+    },
+    {
+      "start": 632.459,
+      "duration": 4.5,
+      "text": "with a name equal to that value so"
+    },
+    {
+      "start": 635.22,
+      "duration": 3.66,
+      "text": "that's the exist functions very simple"
+    },
+    {
+      "start": 636.959,
+      "duration": 4.081,
+      "text": "to use in Django what we're going to see"
+    },
+    {
+      "start": 638.88,
+      "duration": 4.44,
+      "text": "now is how to perform queries that have"
+    },
+    {
+      "start": 641.04,
+      "duration": 4.68,
+      "text": "multiple filters in the where Clause so"
+    },
+    {
+      "start": 643.32,
+      "duration": 4.199,
+      "text": "let's remove this code here and again"
+    },
+    {
+      "start": 645.72,
+      "duration": 3.359,
+      "text": "we're going to filter this down to only"
+    },
+    {
+      "start": 647.519,
+      "duration": 3.481,
+      "text": "the Chinese restaurant so I'm going to"
+    },
+    {
+      "start": 649.079,
+      "duration": 4.521,
+      "text": "pull out the value from that enum and"
+    },
+    {
+      "start": 651.0,
+      "duration": 4.14,
+      "text": "let's now rewrite the filter statement"
+    },
+    {
+      "start": 653.6,
+      "duration": 3.52,
+      "text": "restaurant.objects.filter and we're"
+    },
+    {
+      "start": 655.14,
+      "duration": 3.96,
+      "text": "filtering down to restaurants with the"
+    },
+    {
+      "start": 657.12,
+      "duration": 4.44,
+      "text": "restaurant type equal to Chinese now"
+    },
+    {
+      "start": 659.1,
+      "duration": 4.44,
+      "text": "let's store the value of the squidy and"
+    },
+    {
+      "start": 661.56,
+      "duration": 4.019,
+      "text": "variable code restaurants and we can"
+    },
+    {
+      "start": 663.54,
+      "duration": 3.72,
+      "text": "print it out to the terminal and then"
+    },
+    {
+      "start": 665.579,
+      "duration": 3.541,
+      "text": "what we're going to do is we're going to"
+    },
+    {
+      "start": 667.26,
+      "duration": 3.6,
+      "text": "uncomment the line below here and that's"
+    },
+    {
+      "start": 669.12,
+      "duration": 4.08,
+      "text": "going to allow us to print out the SQL"
+    },
+    {
+      "start": 670.86,
+      "duration": 4.2,
+      "text": "queries that are executed in this script"
+    },
+    {
+      "start": 673.2,
+      "duration": 3.6,
+      "text": "so let's run the script and we're going"
+    },
+    {
+      "start": 675.06,
+      "duration": 3.06,
+      "text": "to see the output now you can see in the"
+    },
+    {
+      "start": 676.8,
+      "duration": 2.88,
+      "text": "query set that we're getting back that"
+    },
+    {
+      "start": 678.12,
+      "duration": 3.839,
+      "text": "we have three restaurants the first one"
+    },
+    {
+      "start": 679.68,
+      "duration": 4.32,
+      "text": "is called Golden Dragon the second is"
+    },
+    {
+      "start": 681.959,
+      "duration": 4.081,
+      "text": "Chinese two and we also have Chinese"
+    },
+    {
+      "start": 684.0,
+      "duration": 3.66,
+      "text": "three so this is the same as we had"
+    },
+    {
+      "start": 686.04,
+      "duration": 3.479,
+      "text": "before we're getting back a query set"
+    },
+    {
+      "start": 687.66,
+      "duration": 3.72,
+      "text": "with three restaurants and if you look"
+    },
+    {
+      "start": 689.519,
+      "duration": 3.961,
+      "text": "at the where Clause we have a single"
+    },
+    {
+      "start": 691.38,
+      "duration": 3.84,
+      "text": "filter operation where we're checking"
+    },
+    {
+      "start": 693.48,
+      "duration": 3.18,
+      "text": "the restaurant type being equal to"
+    },
+    {
+      "start": 695.22,
+      "duration": 3.42,
+      "text": "Chinese so what if we want to add"
+    },
+    {
+      "start": 696.66,
+      "duration": 4.14,
+      "text": "another filter statement here that can"
+    },
+    {
+      "start": 698.64,
+      "duration": 5.34,
+      "text": "allow us to execute more advanced logic"
+    },
+    {
+      "start": 700.8,
+      "duration": 5.46,
+      "text": "by using the and or or not Clauses in"
+    },
+    {
+      "start": 703.98,
+      "duration": 3.9,
+      "text": "SQL so let's make the terminal smaller"
+    },
+    {
+      "start": 706.26,
+      "duration": 3.54,
+      "text": "here and all we need to do if we want to"
+    },
+    {
+      "start": 707.88,
+      "duration": 4.199,
+      "text": "chain an and statement to the where"
+    },
+    {
+      "start": 709.8,
+      "duration": 4.56,
+      "text": "Clause is just pass another keyword"
+    },
+    {
+      "start": 712.079,
+      "duration": 4.081,
+      "text": "argument to filter so as well as the"
+    },
+    {
+      "start": 714.36,
+      "duration": 3.719,
+      "text": "restaurant type being Chinese you can"
+    },
+    {
+      "start": 716.16,
+      "duration": 4.2,
+      "text": "see below that we have two restaurants"
+    },
+    {
+      "start": 718.079,
+      "duration": 4.2,
+      "text": "that have a name it begins with the"
+    },
+    {
+      "start": 720.36,
+      "duration": 3.84,
+      "text": "letter c so if we just want to get back"
+    },
+    {
+      "start": 722.279,
+      "duration": 4.261,
+      "text": "the restaurants that are Chinese and"
+    },
+    {
+      "start": 724.2,
+      "duration": 4.379,
+      "text": "have a name that starts with C we can"
+    },
+    {
+      "start": 726.54,
+      "duration": 4.38,
+      "text": "use the name field on the model and we"
+    },
+    {
+      "start": 728.579,
+      "duration": 4.141,
+      "text": "can use the start with lookup and as I"
+    },
+    {
+      "start": 730.92,
+      "duration": 3.96,
+      "text": "said in the previous video lookups allow"
+    },
+    {
+      "start": 732.72,
+      "duration": 4.26,
+      "text": "you to customize what's passed to a"
+    },
+    {
+      "start": 734.88,
+      "duration": 4.26,
+      "text": "where clause in SQL in this case we're"
+    },
+    {
+      "start": 736.98,
+      "duration": 4.08,
+      "text": "going to check names that begin with the"
+    },
+    {
+      "start": 739.14,
+      "duration": 4.8,
+      "text": "letter c and this is going to create an"
+    },
+    {
+      "start": 741.06,
+      "duration": 4.44,
+      "text": "and close in the SQL where Clause it's"
+    },
+    {
+      "start": 743.94,
+      "duration": 3.78,
+      "text": "going to check for restaurant types that"
+    },
+    {
+      "start": 745.5,
+      "duration": 4.44,
+      "text": "are equal to Chinese and whose names"
+    },
+    {
+      "start": 747.72,
+      "duration": 4.14,
+      "text": "begin with the letter c so let's now"
+    },
+    {
+      "start": 749.94,
+      "duration": 3.36,
+      "text": "clear the terminal and I'm going to run"
+    },
+    {
+      "start": 751.86,
+      "duration": 3.36,
+      "text": "this script and we're going to see the"
+    },
+    {
+      "start": 753.3,
+      "duration": 3.42,
+      "text": "output here you can see the query set"
+    },
+    {
+      "start": 755.22,
+      "duration": 3.72,
+      "text": "that we're getting back no longer has"
+    },
+    {
+      "start": 756.72,
+      "duration": 4.14,
+      "text": "three records it's down to two and those"
+    },
+    {
+      "start": 758.94,
+      "duration": 3.72,
+      "text": "two records are the ones that both begin"
+    },
+    {
+      "start": 760.86,
+      "duration": 3.599,
+      "text": "with the letter c and if we look at the"
+    },
+    {
+      "start": 762.66,
+      "duration": 3.359,
+      "text": "SQL statement you can see the Clause"
+    },
+    {
+      "start": 764.459,
+      "duration": 3.781,
+      "text": "that we had before with the restaurant"
+    },
+    {
+      "start": 766.019,
+      "duration": 4.081,
+      "text": "type is equal to Chinese but we also"
+    },
+    {
+      "start": 768.24,
+      "duration": 3.3,
+      "text": "have another Clause here where we are"
+    },
+    {
+      "start": 770.1,
+      "duration": 4.08,
+      "text": "looking at the name field and we're"
+    },
+    {
+      "start": 771.54,
+      "duration": 4.68,
+      "text": "finding records whose name is like this"
+    },
+    {
+      "start": 774.18,
+      "duration": 3.839,
+      "text": "particular pattern here where we have"
+    },
+    {
+      "start": 776.22,
+      "duration": 4.32,
+      "text": "the letter c and then the Wild Card"
+    },
+    {
+      "start": 778.019,
+      "duration": 3.781,
+      "text": "percentage operator after that and that"
+    },
+    {
+      "start": 780.54,
+      "duration": 3.239,
+      "text": "pattern allows us to check for"
+    },
+    {
+      "start": 781.8,
+      "duration": 4.08,
+      "text": "restaurants that begin with the letter c"
+    },
+    {
+      "start": 783.779,
+      "duration": 4.86,
+      "text": "but the important thing to note in this"
+    },
+    {
+      "start": 785.88,
+      "duration": 4.8,
+      "text": "where Clause is the and operator here so"
+    },
+    {
+      "start": 788.639,
+      "duration": 4.561,
+      "text": "the resulting query set is going to have"
+    },
+    {
+      "start": 790.68,
+      "duration": 4.62,
+      "text": "restaurants that begin with C and whose"
+    },
+    {
+      "start": 793.2,
+      "duration": 4.079,
+      "text": "restaurant type is equal to Chinese so"
+    },
+    {
+      "start": 795.3,
+      "duration": 3.599,
+      "text": "in order to chain these and clauses"
+    },
+    {
+      "start": 797.279,
+      "duration": 3.721,
+      "text": "together all we need to do is pass"
+    },
+    {
+      "start": 798.899,
+      "duration": 4.68,
+      "text": "different keyword arguments to the dot"
+    },
+    {
+      "start": 801.0,
+      "duration": 4.139,
+      "text": "filter or exclude functions so this is"
+    },
+    {
+      "start": 803.579,
+      "duration": 3.601,
+      "text": "the starch width filter we're going to"
+    },
+    {
+      "start": 805.139,
+      "duration": 3.781,
+      "text": "look at another filter now the N filter"
+    },
+    {
+      "start": 807.18,
+      "duration": 3.959,
+      "text": "so I'm going to clear this code and"
+    },
+    {
+      "start": 808.92,
+      "duration": 4.68,
+      "text": "Define three variables here let me tab"
+    },
+    {
+      "start": 811.139,
+      "duration": 4.741,
+      "text": "these over we have Chinese Indian and"
+    },
+    {
+      "start": 813.6,
+      "duration": 4.2,
+      "text": "Mexican and we're taking the values from"
+    },
+    {
+      "start": 815.88,
+      "duration": 3.48,
+      "text": "that enum and we're storing it in a"
+    },
+    {
+      "start": 817.8,
+      "duration": 3.12,
+      "text": "variable let's now create a variable"
+    },
+    {
+      "start": 819.36,
+      "duration": 3.539,
+      "text": "called check types and we're going to"
+    },
+    {
+      "start": 820.92,
+      "duration": 3.479,
+      "text": "set that equal to these three values"
+    },
+    {
+      "start": 822.899,
+      "duration": 3.661,
+      "text": "we're just going to pack them into a"
+    },
+    {
+      "start": 824.399,
+      "duration": 4.38,
+      "text": "list that's the Chinese the Indian and"
+    },
+    {
+      "start": 826.56,
+      "duration": 3.66,
+      "text": "the Mexican values now what we're going"
+    },
+    {
+      "start": 828.779,
+      "duration": 3.841,
+      "text": "to try and Achieve here is we're going"
+    },
+    {
+      "start": 830.22,
+      "duration": 4.5,
+      "text": "to try and find all restaurants that are"
+    },
+    {
+      "start": 832.62,
+      "duration": 3.42,
+      "text": "one of these values so let's create a"
+    },
+    {
+      "start": 834.72,
+      "duration": 3.08,
+      "text": "variable called restaurants and we're"
+    },
+    {
+      "start": 836.04,
+      "duration": 3.12,
+      "text": "going to use the"
+    },
+    {
+      "start": 837.8,
+      "duration": 3.159,
+      "text": "restaurant.objects.filter statement"
+    },
+    {
+      "start": 839.16,
+      "duration": 3.72,
+      "text": "again and again we're going to check the"
+    },
+    {
+      "start": 840.959,
+      "duration": 3.721,
+      "text": "restaurant type which is a field on the"
+    },
+    {
+      "start": 842.88,
+      "duration": 3.42,
+      "text": "restaurant model but instead of just"
+    },
+    {
+      "start": 844.68,
+      "duration": 3.899,
+      "text": "using an equality here we're going to"
+    },
+    {
+      "start": 846.3,
+      "duration": 4.44,
+      "text": "chain the end lookup so two underscores"
+    },
+    {
+      "start": 848.579,
+      "duration": 4.621,
+      "text": "and then in and we can set that equal to"
+    },
+    {
+      "start": 850.74,
+      "duration": 4.32,
+      "text": "our sequence in Python for example a"
+    },
+    {
+      "start": 853.2,
+      "duration": 3.24,
+      "text": "list that we have above so what this is"
+    },
+    {
+      "start": 855.06,
+      "duration": 3.959,
+      "text": "going to do is it's going to find all"
+    },
+    {
+      "start": 856.44,
+      "duration": 4.5,
+      "text": "restaurants whose type is one of these"
+    },
+    {
+      "start": 859.019,
+      "duration": 3.481,
+      "text": "three values so let's print these"
+    },
+    {
+      "start": 860.94,
+      "duration": 3.36,
+      "text": "restaurants to the terminal and we're"
+    },
+    {
+      "start": 862.5,
+      "duration": 3.0,
+      "text": "going to run the script again and you"
+    },
+    {
+      "start": 864.3,
+      "duration": 3.06,
+      "text": "can see at the top here that we're"
+    },
+    {
+      "start": 865.5,
+      "duration": 3.839,
+      "text": "getting back the query set that contains"
+    },
+    {
+      "start": 867.36,
+      "duration": 4.32,
+      "text": "Chinese restaurants it contains Indian"
+    },
+    {
+      "start": 869.339,
+      "duration": 3.781,
+      "text": "restaurants and it also contains the"
+    },
+    {
+      "start": 871.68,
+      "duration": 3.36,
+      "text": "Mexican restaurants as well but it"
+    },
+    {
+      "start": 873.12,
+      "duration": 4.08,
+      "text": "doesn't contain the Italian and other"
+    },
+    {
+      "start": 875.04,
+      "duration": 3.9,
+      "text": "restaurants that we have in the data and"
+    },
+    {
+      "start": 877.2,
+      "duration": 3.66,
+      "text": "if you look at the SQL query you can see"
+    },
+    {
+      "start": 878.94,
+      "duration": 4.019,
+      "text": "a new operator that's being used here"
+    },
+    {
+      "start": 880.86,
+      "duration": 4.26,
+      "text": "and that's the N operator and that's"
+    },
+    {
+      "start": 882.959,
+      "duration": 4.68,
+      "text": "used to check if a particular column's"
+    },
+    {
+      "start": 885.12,
+      "duration": 5.04,
+      "text": "values are in this set that we Define"
+    },
+    {
+      "start": 887.639,
+      "duration": 4.741,
+      "text": "after the N operator so we're checking"
+    },
+    {
+      "start": 890.16,
+      "duration": 4.919,
+      "text": "if the restaurant type is one of Chinese"
+    },
+    {
+      "start": 892.38,
+      "duration": 4.74,
+      "text": "Indian or Mexican that's the query and"
+    },
+    {
+      "start": 895.079,
+      "duration": 4.62,
+      "text": "it's returning that query set to Django"
+    },
+    {
+      "start": 897.12,
+      "duration": 4.019,
+      "text": "consisting of the correct models so"
+    },
+    {
+      "start": 899.699,
+      "duration": 3.061,
+      "text": "we've seen a bit more about how to use"
+    },
+    {
+      "start": 901.139,
+      "duration": 3.601,
+      "text": "filter and how we can use multiple"
+    },
+    {
+      "start": 902.76,
+      "duration": 4.319,
+      "text": "keyword arguments to chain them together"
+    },
+    {
+      "start": 904.74,
+      "duration": 5.099,
+      "text": "using an and close and we've also seen"
+    },
+    {
+      "start": 907.079,
+      "duration": 5.7,
+      "text": "how to use the N lookup here in order to"
+    },
+    {
+      "start": 909.839,
+      "duration": 4.921,
+      "text": "translate that to an in SQL operator to"
+    },
+    {
+      "start": 912.779,
+      "duration": 4.62,
+      "text": "check if a particular column's values"
+    },
+    {
+      "start": 914.76,
+      "duration": 4.74,
+      "text": "are in a predefined set we're now going"
+    },
+    {
+      "start": 917.399,
+      "duration": 4.44,
+      "text": "to look at the exclude method in Django"
+    },
+    {
+      "start": 919.5,
+      "duration": 4.8,
+      "text": "and this method is the inverse of the"
+    },
+    {
+      "start": 921.839,
+      "duration": 4.86,
+      "text": "filter method and it results in exactly"
+    },
+    {
+      "start": 924.3,
+      "duration": 4.44,
+      "text": "the same SQL query that's executed by"
+    },
+    {
+      "start": 926.699,
+      "duration": 4.5,
+      "text": "the filter method but it simply adds a"
+    },
+    {
+      "start": 928.74,
+      "duration": 4.02,
+      "text": "not operator before the where Clause so"
+    },
+    {
+      "start": 931.199,
+      "duration": 3.481,
+      "text": "let's see that in action we're going to"
+    },
+    {
+      "start": 932.76,
+      "duration": 3.36,
+      "text": "remove all this code but I'm going to"
+    },
+    {
+      "start": 934.68,
+      "duration": 3.48,
+      "text": "keep the reference to the Chinese"
+    },
+    {
+      "start": 936.12,
+      "duration": 4.019,
+      "text": "restaurants around and let's say that we"
+    },
+    {
+      "start": 938.16,
+      "duration": 4.26,
+      "text": "want to get all the restaurants in the"
+    },
+    {
+      "start": 940.139,
+      "duration": 3.841,
+      "text": "data except for the Chinese restaurants"
+    },
+    {
+      "start": 942.42,
+      "duration": 3.3,
+      "text": "so we don't want to get Chinese"
+    },
+    {
+      "start": 943.98,
+      "duration": 3.419,
+      "text": "restaurants we just want to get any"
+    },
+    {
+      "start": 945.72,
+      "duration": 3.119,
+      "text": "other type of restaurant so what we're"
+    },
+    {
+      "start": 947.399,
+      "duration": 2.94,
+      "text": "going to do is write a query here and"
+    },
+    {
+      "start": 948.839,
+      "duration": 4.161,
+      "text": "store it in a variable called"
+    },
+    {
+      "start": 950.339,
+      "duration": 4.56,
+      "text": "restaurants so it's going to be"
+    },
+    {
+      "start": 953.0,
+      "duration": 3.76,
+      "text": "restaurant.objects.exclude and instead"
+    },
+    {
+      "start": 954.899,
+      "duration": 4.38,
+      "text": "of filter we're now using this exclude"
+    },
+    {
+      "start": 956.76,
+      "duration": 5.759,
+      "text": "method and we pass the condition to that"
+    },
+    {
+      "start": 959.279,
+      "duration": 5.221,
+      "text": "so restaurant type equal to Chinese as"
+    },
+    {
+      "start": 962.519,
+      "duration": 3.781,
+      "text": "the condition and unlike filter when"
+    },
+    {
+      "start": 964.5,
+      "duration": 4.139,
+      "text": "it's going to return values where the"
+    },
+    {
+      "start": 966.3,
+      "duration": 4.14,
+      "text": "restaurant type is equal to Chinese this"
+    },
+    {
+      "start": 968.639,
+      "duration": 3.901,
+      "text": "is going to add a not to the where"
+    },
+    {
+      "start": 970.44,
+      "duration": 4.139,
+      "text": "clause and it's going to then result in"
+    },
+    {
+      "start": 972.54,
+      "duration": 3.84,
+      "text": "returning any restaurant whose type is"
+    },
+    {
+      "start": 974.579,
+      "duration": 3.601,
+      "text": "not Chinese so let's print these"
+    },
+    {
+      "start": 976.38,
+      "duration": 3.24,
+      "text": "restaurants to the terminal and we can"
+    },
+    {
+      "start": 978.18,
+      "duration": 3.12,
+      "text": "execute the script and I'm going to make"
+    },
+    {
+      "start": 979.62,
+      "duration": 3.36,
+      "text": "the terminal bigger here so we can see"
+    },
+    {
+      "start": 981.3,
+      "duration": 3.36,
+      "text": "the query you can see at the top the"
+    },
+    {
+      "start": 982.98,
+      "duration": 4.08,
+      "text": "query set we're getting back contains"
+    },
+    {
+      "start": 984.66,
+      "duration": 4.619,
+      "text": "the Italian and Indian restaurants and"
+    },
+    {
+      "start": 987.06,
+      "duration": 4.079,
+      "text": "so on but it doesn't contain any Chinese"
+    },
+    {
+      "start": 989.279,
+      "duration": 4.021,
+      "text": "restaurants and if we look at the SQL"
+    },
+    {
+      "start": 991.139,
+      "duration": 4.14,
+      "text": "statement here we're getting all the"
+    },
+    {
+      "start": 993.3,
+      "duration": 4.2,
+      "text": "values from the restaurant table but we"
+    },
+    {
+      "start": 995.279,
+      "duration": 3.901,
+      "text": "have this we're not statement and we're"
+    },
+    {
+      "start": 997.5,
+      "duration": 4.44,
+      "text": "getting values back where the restaurant"
+    },
+    {
+      "start": 999.18,
+      "duration": 4.44,
+      "text": "type is not equal to Chinese so what"
+    },
+    {
+      "start": 1001.94,
+      "duration": 4.199,
+      "text": "happens with the exclude function in"
+    },
+    {
+      "start": 1003.62,
+      "duration": 4.68,
+      "text": "Django is that it adds a not close to"
+    },
+    {
+      "start": 1006.139,
+      "duration": 3.901,
+      "text": "the SQL statement and specifically it"
+    },
+    {
+      "start": 1008.3,
+      "duration": 3.719,
+      "text": "adds it to that where Clause when it's"
+    },
+    {
+      "start": 1010.04,
+      "duration": 3.659,
+      "text": "doing the filtering so when you use the"
+    },
+    {
+      "start": 1012.019,
+      "duration": 3.0,
+      "text": "filter function you're seeing give me"
+    },
+    {
+      "start": 1013.699,
+      "duration": 3.301,
+      "text": "back the records that meet the"
+    },
+    {
+      "start": 1015.019,
+      "duration": 3.781,
+      "text": "conditions that we're passing to the"
+    },
+    {
+      "start": 1017.0,
+      "duration": 4.199,
+      "text": "function as arguments but when you use"
+    },
+    {
+      "start": 1018.8,
+      "duration": 4.26,
+      "text": "the X squid function we're seeing get me"
+    },
+    {
+      "start": 1021.199,
+      "duration": 3.72,
+      "text": "back all the records that do not meet"
+    },
+    {
+      "start": 1023.06,
+      "duration": 3.3,
+      "text": "the conditions that we're passing and we"
+    },
+    {
+      "start": 1024.919,
+      "duration": 3.061,
+      "text": "can use lookups with the exclude"
+    },
+    {
+      "start": 1026.36,
+      "duration": 3.839,
+      "text": "function just as we did with the filter"
+    },
+    {
+      "start": 1027.98,
+      "duration": 4.02,
+      "text": "function so let's grab Indian values"
+    },
+    {
+      "start": 1030.199,
+      "duration": 3.901,
+      "text": "from that enum and we're now going to"
+    },
+    {
+      "start": 1032.0,
+      "duration": 5.04,
+      "text": "get all restaurants where the value of"
+    },
+    {
+      "start": 1034.1,
+      "duration": 4.8,
+      "text": "the restaurant type is not Chinese or"
+    },
+    {
+      "start": 1037.04,
+      "duration": 3.659,
+      "text": "Indian so in order to do that we can"
+    },
+    {
+      "start": 1038.9,
+      "duration": 3.84,
+      "text": "remove this equal sign and we can use"
+    },
+    {
+      "start": 1040.699,
+      "duration": 4.921,
+      "text": "the N operator and we can pass a list"
+    },
+    {
+      "start": 1042.74,
+      "duration": 4.679,
+      "text": "here equal to Chinese and Indian values"
+    },
+    {
+      "start": 1045.62,
+      "duration": 3.299,
+      "text": "in that list so this is going to exclude"
+    },
+    {
+      "start": 1047.419,
+      "duration": 4.38,
+      "text": "any restaurants where the restaurant"
+    },
+    {
+      "start": 1048.919,
+      "duration": 4.921,
+      "text": "type is one of these two values so let's"
+    },
+    {
+      "start": 1051.799,
+      "duration": 4.26,
+      "text": "execute the script and we can analyze"
+    },
+    {
+      "start": 1053.84,
+      "duration": 4.14,
+      "text": "the output at the top here and again we"
+    },
+    {
+      "start": 1056.059,
+      "duration": 3.781,
+      "text": "have in the where Clause here and not"
+    },
+    {
+      "start": 1057.98,
+      "duration": 4.439,
+      "text": "operator and we're checking if the"
+    },
+    {
+      "start": 1059.84,
+      "duration": 4.92,
+      "text": "restaurant type is in Chinese or Indian"
+    },
+    {
+      "start": 1062.419,
+      "duration": 4.26,
+      "text": "and we're excluding that with the note"
+    },
+    {
+      "start": 1064.76,
+      "duration": 3.779,
+      "text": "operator so if you understand the filter"
+    },
+    {
+      "start": 1066.679,
+      "duration": 4.5,
+      "text": "function you should understand exclude"
+    },
+    {
+      "start": 1068.539,
+      "duration": 4.441,
+      "text": "as well it's just the inverse of filter"
+    },
+    {
+      "start": 1071.179,
+      "duration": 4.441,
+      "text": "so let's now move on we're going to show"
+    },
+    {
+      "start": 1072.98,
+      "duration": 3.72,
+      "text": "some additional lookups in Django now so"
+    },
+    {
+      "start": 1075.62,
+      "duration": 3.179,
+      "text": "let's say we wanted to get all"
+    },
+    {
+      "start": 1076.7,
+      "duration": 5.339,
+      "text": "restaurants that started with letters a"
+    },
+    {
+      "start": 1078.799,
+      "duration": 4.921,
+      "text": "b c C or D we can use the less than"
+    },
+    {
+      "start": 1082.039,
+      "duration": 3.38,
+      "text": "lookup for lists so let's write the"
+    },
+    {
+      "start": 1083.72,
+      "duration": 3.42,
+      "text": "query now it's going to be"
+    },
+    {
+      "start": 1085.419,
+      "duration": 3.701,
+      "text": "restaurant.objects.filter and if we want"
+    },
+    {
+      "start": 1087.14,
+      "duration": 3.6,
+      "text": "restaurants whose name begins with a B C"
+    },
+    {
+      "start": 1089.12,
+      "duration": 4.2,
+      "text": "or D we're going to use the name field"
+    },
+    {
+      "start": 1090.74,
+      "duration": 3.96,
+      "text": "and we can use the less than lookup now"
+    },
+    {
+      "start": 1093.32,
+      "duration": 3.18,
+      "text": "the value that we pass here is the"
+    },
+    {
+      "start": 1094.7,
+      "duration": 3.18,
+      "text": "letter e and what that is going to do is"
+    },
+    {
+      "start": 1096.5,
+      "duration": 3.48,
+      "text": "it's going to give us back all"
+    },
+    {
+      "start": 1097.88,
+      "duration": 4.799,
+      "text": "restaurants in the data whose name"
+    },
+    {
+      "start": 1099.98,
+      "duration": 4.74,
+      "text": "begins with letters a to d so let's"
+    },
+    {
+      "start": 1102.679,
+      "duration": 4.021,
+      "text": "store that in a variable and then we can"
+    },
+    {
+      "start": 1104.72,
+      "duration": 3.9,
+      "text": "print it to the terminal let's now run"
+    },
+    {
+      "start": 1106.7,
+      "duration": 3.96,
+      "text": "the script and we can analyze the output"
+    },
+    {
+      "start": 1108.62,
+      "duration": 3.72,
+      "text": "of that query so you can see at the top"
+    },
+    {
+      "start": 1110.66,
+      "duration": 3.0,
+      "text": "we have three restaurants printed to the"
+    },
+    {
+      "start": 1112.34,
+      "duration": 3.66,
+      "text": "terminal and these begin with the"
+    },
+    {
+      "start": 1113.66,
+      "duration": 4.5,
+      "text": "letters b and c so we're getting back"
+    },
+    {
+      "start": 1116.0,
+      "duration": 4.14,
+      "text": "all restaurants whose letter for the"
+    },
+    {
+      "start": 1118.16,
+      "duration": 4.139,
+      "text": "first name starts with something that is"
+    },
+    {
+      "start": 1120.14,
+      "duration": 3.779,
+      "text": "less than the letter e and if we look at"
+    },
+    {
+      "start": 1122.299,
+      "duration": 3.0,
+      "text": "the where clause in the SQL you can see"
+    },
+    {
+      "start": 1123.919,
+      "duration": 3.12,
+      "text": "that we're looking at the name column"
+    },
+    {
+      "start": 1125.299,
+      "duration": 4.681,
+      "text": "and we're getting back any restaurant"
+    },
+    {
+      "start": 1127.039,
+      "duration": 4.981,
+      "text": "whose name is less than the letter e so"
+    },
+    {
+      "start": 1129.98,
+      "duration": 4.199,
+      "text": "when you use the less than lookup in"
+    },
+    {
+      "start": 1132.02,
+      "duration": 4.86,
+      "text": "Django it's going to translate that to"
+    },
+    {
+      "start": 1134.179,
+      "duration": 4.261,
+      "text": "this less than operator in SQL and it's"
+    },
+    {
+      "start": 1136.88,
+      "duration": 3.659,
+      "text": "going to use that within the where"
+    },
+    {
+      "start": 1138.44,
+      "duration": 3.84,
+      "text": "Clause to filter the results you're"
+    },
+    {
+      "start": 1140.539,
+      "duration": 3.661,
+      "text": "getting back from the table now it's"
+    },
+    {
+      "start": 1142.28,
+      "duration": 4.259,
+      "text": "probably more common to use the less"
+    },
+    {
+      "start": 1144.2,
+      "duration": 4.92,
+      "text": "than lookup with numerical data rather"
+    },
+    {
+      "start": 1146.539,
+      "duration": 3.841,
+      "text": "than with a car field or textual data so"
+    },
+    {
+      "start": 1149.12,
+      "duration": 2.76,
+      "text": "what we're going to do now is we're"
+    },
+    {
+      "start": 1150.38,
+      "duration": 3.06,
+      "text": "going to look up a different field and"
+    },
+    {
+      "start": 1151.88,
+      "duration": 3.84,
+      "text": "I'm going to look up the longitude field"
+    },
+    {
+      "start": 1153.44,
+      "duration": 5.099,
+      "text": "and let's get all longitudes that are"
+    },
+    {
+      "start": 1155.72,
+      "duration": 5.22,
+      "text": "greater than the number 0 here so this"
+    },
+    {
+      "start": 1158.539,
+      "duration": 4.681,
+      "text": "is another lookup very similar to the LT"
+    },
+    {
+      "start": 1160.94,
+      "duration": 3.9,
+      "text": "less than lookup this one is greater"
+    },
+    {
+      "start": 1163.22,
+      "duration": 3.78,
+      "text": "than now basically when you have a"
+    },
+    {
+      "start": 1164.84,
+      "duration": 4.44,
+      "text": "longitude that's greater than zero you"
+    },
+    {
+      "start": 1167.0,
+      "duration": 4.26,
+      "text": "have a longitude that is east of the"
+    },
+    {
+      "start": 1169.28,
+      "duration": 3.66,
+      "text": "city of London in the UK and that's"
+    },
+    {
+      "start": 1171.26,
+      "duration": 3.84,
+      "text": "because London is basically on What's"
+    },
+    {
+      "start": 1172.94,
+      "duration": 4.2,
+      "text": "called the prime meridian now longitude"
+    },
+    {
+      "start": 1175.1,
+      "duration": 3.959,
+      "text": "is a float field in the database so if"
+    },
+    {
+      "start": 1177.14,
+      "duration": 4.68,
+      "text": "we're using the greater than lookup here"
+    },
+    {
+      "start": 1179.059,
+      "duration": 4.62,
+      "text": "it's going to check for values numerical"
+    },
+    {
+      "start": 1181.82,
+      "duration": 3.719,
+      "text": "values that are greater than what we"
+    },
+    {
+      "start": 1183.679,
+      "duration": 3.481,
+      "text": "pass in which in this case is zero so"
+    },
+    {
+      "start": 1185.539,
+      "duration": 3.601,
+      "text": "let's execute the script and this time"
+    },
+    {
+      "start": 1187.16,
+      "duration": 4.2,
+      "text": "we can see two values in the query set"
+    },
+    {
+      "start": 1189.14,
+      "duration": 4.44,
+      "text": "and it's for a pizzeria and an Italian"
+    },
+    {
+      "start": 1191.36,
+      "duration": 4.439,
+      "text": "and I've hard coded some longitudes into"
+    },
+    {
+      "start": 1193.58,
+      "duration": 5.099,
+      "text": "the data set so these are presumably in"
+    },
+    {
+      "start": 1195.799,
+      "duration": 4.861,
+      "text": "Italy which is to the east of the UK and"
+    },
+    {
+      "start": 1198.679,
+      "duration": 3.481,
+      "text": "again let's look at the SQL where Clause"
+    },
+    {
+      "start": 1200.66,
+      "duration": 3.06,
+      "text": "we're looking at the longitude here and"
+    },
+    {
+      "start": 1202.16,
+      "duration": 3.96,
+      "text": "we're checking for longitudes that are"
+    },
+    {
+      "start": 1203.72,
+      "duration": 4.5,
+      "text": "greater than 0.0 and we're using the"
+    },
+    {
+      "start": 1206.12,
+      "duration": 4.679,
+      "text": "greater than lookup which converts to"
+    },
+    {
+      "start": 1208.22,
+      "duration": 4.38,
+      "text": "this greater than operator in the SQL"
+    },
+    {
+      "start": 1210.799,
+      "duration": 3.541,
+      "text": "workload so this query is giving us"
+    },
+    {
+      "start": 1212.6,
+      "duration": 3.18,
+      "text": "restaurants that are east of London"
+    },
+    {
+      "start": 1214.34,
+      "duration": 3.9,
+      "text": "basically what if we wanted to get"
+    },
+    {
+      "start": 1215.78,
+      "duration": 4.259,
+      "text": "restaurants that are west of London well"
+    },
+    {
+      "start": 1218.24,
+      "duration": 4.08,
+      "text": "all we have to do is either change the"
+    },
+    {
+      "start": 1220.039,
+      "duration": 3.901,
+      "text": "filter to an exclude function you can"
+    },
+    {
+      "start": 1222.32,
+      "duration": 3.719,
+      "text": "see this time we're getting back all"
+    },
+    {
+      "start": 1223.94,
+      "duration": 4.44,
+      "text": "restaurants that are west of London and"
+    },
+    {
+      "start": 1226.039,
+      "duration": 3.961,
+      "text": "in the SQL statement here is the lookup"
+    },
+    {
+      "start": 1228.38,
+      "duration": 3.539,
+      "text": "where we're checking if the longitude is"
+    },
+    {
+      "start": 1230.0,
+      "duration": 4.5,
+      "text": "greater than zero but this time we have"
+    },
+    {
+      "start": 1231.919,
+      "duration": 4.561,
+      "text": "a we're not close used instead and"
+    },
+    {
+      "start": 1234.5,
+      "duration": 4.08,
+      "text": "another way to check if restaurants are"
+    },
+    {
+      "start": 1236.48,
+      "duration": 3.9,
+      "text": "west of London is you can continue using"
+    },
+    {
+      "start": 1238.58,
+      "duration": 4.02,
+      "text": "the dot filter function but change the"
+    },
+    {
+      "start": 1240.38,
+      "duration": 4.38,
+      "text": "lookup so we can look up values that are"
+    },
+    {
+      "start": 1242.6,
+      "duration": 4.14,
+      "text": "less than zero in this case and that"
+    },
+    {
+      "start": 1244.76,
+      "duration": 3.36,
+      "text": "should give us the same output but it's"
+    },
+    {
+      "start": 1246.74,
+      "duration": 3.42,
+      "text": "going to use a slightly different query"
+    },
+    {
+      "start": 1248.12,
+      "duration": 3.54,
+      "text": "we don't have a wear note close we just"
+    },
+    {
+      "start": 1250.16,
+      "duration": 3.66,
+      "text": "have a where Clause but we've switched"
+    },
+    {
+      "start": 1251.66,
+      "duration": 4.08,
+      "text": "the operator from greaterland to less"
+    },
+    {
+      "start": 1253.82,
+      "duration": 4.32,
+      "text": "than so it's different ways of achieving"
+    },
+    {
+      "start": 1255.74,
+      "duration": 4.559,
+      "text": "very similar or the same results in"
+    },
+    {
+      "start": 1258.14,
+      "duration": 4.2,
+      "text": "Django using these operators so let's"
+    },
+    {
+      "start": 1260.299,
+      "duration": 3.781,
+      "text": "see a few more examples here of these"
+    },
+    {
+      "start": 1262.34,
+      "duration": 3.36,
+      "text": "lookups I'm going to use the sale object"
+    },
+    {
+      "start": 1264.08,
+      "duration": 3.36,
+      "text": "now and I'm going to store these in a"
+    },
+    {
+      "start": 1265.7,
+      "duration": 4.02,
+      "text": "variable called sales and the sale"
+    },
+    {
+      "start": 1267.44,
+      "duration": 3.54,
+      "text": "object has a field called income and"
+    },
+    {
+      "start": 1269.72,
+      "duration": 3.66,
+      "text": "we're going to get incomes that are"
+    },
+    {
+      "start": 1270.98,
+      "duration": 4.199,
+      "text": "greater than 90 in the data so let's"
+    },
+    {
+      "start": 1273.38,
+      "duration": 3.06,
+      "text": "execute this and if we look at the"
+    },
+    {
+      "start": 1275.179,
+      "duration": 3.301,
+      "text": "result here we get a bunch of sale"
+    },
+    {
+      "start": 1276.44,
+      "duration": 3.72,
+      "text": "objects in this query set and the where"
+    },
+    {
+      "start": 1278.48,
+      "duration": 3.48,
+      "text": "clause for this is looking at the income"
+    },
+    {
+      "start": 1280.16,
+      "duration": 3.36,
+      "text": "field and getting values greater than"
+    },
+    {
+      "start": 1281.96,
+      "duration": 3.959,
+      "text": "90. so I think it's easy to understand"
+    },
+    {
+      "start": 1283.52,
+      "duration": 4.44,
+      "text": "the greater than and less than lookups"
+    },
+    {
+      "start": 1285.919,
+      "duration": 4.201,
+      "text": "and by the way there is also greater"
+    },
+    {
+      "start": 1287.96,
+      "duration": 4.079,
+      "text": "than and equal to you just put an e at"
+    },
+    {
+      "start": 1290.12,
+      "duration": 4.32,
+      "text": "the end of that and also less than or"
+    },
+    {
+      "start": 1292.039,
+      "duration": 3.721,
+      "text": "equal to as well so these exist if you"
+    },
+    {
+      "start": 1294.44,
+      "duration": 3.18,
+      "text": "want to check if something is greater"
+    },
+    {
+      "start": 1295.76,
+      "duration": 3.659,
+      "text": "than or equal to or less than or equal"
+    },
+    {
+      "start": 1297.62,
+      "duration": 3.36,
+      "text": "to a value what we're going to see is"
+    },
+    {
+      "start": 1299.419,
+      "duration": 3.601,
+      "text": "another lookup here and then we're going"
+    },
+    {
+      "start": 1300.98,
+      "duration": 4.26,
+      "text": "to move on to ordering and this is the"
+    },
+    {
+      "start": 1303.02,
+      "duration": 4.5,
+      "text": "range lookup so to the range lookup you"
+    },
+    {
+      "start": 1305.24,
+      "duration": 4.679,
+      "text": "can pass a tuple of two values the lower"
+    },
+    {
+      "start": 1307.52,
+      "duration": 4.019,
+      "text": "boundary for the lookup and the upper"
+    },
+    {
+      "start": 1309.919,
+      "duration": 3.841,
+      "text": "boundary for the lookup so let's see we"
+    },
+    {
+      "start": 1311.539,
+      "duration": 5.041,
+      "text": "wanted to get all sales that have an"
+    },
+    {
+      "start": 1313.76,
+      "duration": 4.5,
+      "text": "income that's between 50 and 60. let's"
+    },
+    {
+      "start": 1316.58,
+      "duration": 3.839,
+      "text": "execute this script with the range"
+    },
+    {
+      "start": 1318.26,
+      "duration": 3.96,
+      "text": "lookup and we get back some objects but"
+    },
+    {
+      "start": 1320.419,
+      "duration": 3.661,
+      "text": "let's look at the SQL here at the where"
+    },
+    {
+      "start": 1322.22,
+      "duration": 4.199,
+      "text": "Clause we're looking at the income field"
+    },
+    {
+      "start": 1324.08,
+      "duration": 4.38,
+      "text": "and we see a new SQL operator called"
+    },
+    {
+      "start": 1326.419,
+      "duration": 4.321,
+      "text": "between here and we're getting incomes"
+    },
+    {
+      "start": 1328.46,
+      "duration": 4.44,
+      "text": "that are between 50 and 60. what's"
+    },
+    {
+      "start": 1330.74,
+      "duration": 4.319,
+      "text": "happening is it's translating the values"
+    },
+    {
+      "start": 1332.9,
+      "duration": 3.96,
+      "text": "that we pass in to an SQL between"
+    },
+    {
+      "start": 1335.059,
+      "duration": 3.421,
+      "text": "statement and it's getting back the"
+    },
+    {
+      "start": 1336.86,
+      "duration": 3.12,
+      "text": "records that are between those two"
+    },
+    {
+      "start": 1338.48,
+      "duration": 3.12,
+      "text": "values and just to prove that we're"
+    },
+    {
+      "start": 1339.98,
+      "duration": 3.78,
+      "text": "going to use a list comprehension here"
+    },
+    {
+      "start": 1341.6,
+      "duration": 3.42,
+      "text": "and for each sale in the sales that"
+    },
+    {
+      "start": 1343.76,
+      "duration": 3.48,
+      "text": "we're getting back we're going to print"
+    },
+    {
+      "start": 1345.02,
+      "duration": 4.08,
+      "text": "out the sales income and we're going to"
+    },
+    {
+      "start": 1347.24,
+      "duration": 3.9,
+      "text": "make sure these are all between the"
+    },
+    {
+      "start": 1349.1,
+      "duration": 5.52,
+      "text": "values 50 and 60. so you can see these"
+    },
+    {
+      "start": 1351.14,
+      "duration": 5.64,
+      "text": "decimals coming back 51 58 and so on all"
+    },
+    {
+      "start": 1354.62,
+      "duration": 4.14,
+      "text": "of them are within or rather between"
+    },
+    {
+      "start": 1356.78,
+      "duration": 3.66,
+      "text": "those boundaries and that's what you can"
+    },
+    {
+      "start": 1358.76,
+      "duration": 3.299,
+      "text": "do with the range lookup it's quite"
+    },
+    {
+      "start": 1360.44,
+      "duration": 3.96,
+      "text": "powerful and you can also use this with"
+    },
+    {
+      "start": 1362.059,
+      "duration": 4.381,
+      "text": "date times in order to get all the rows"
+    },
+    {
+      "start": 1364.4,
+      "duration": 3.96,
+      "text": "from a database that fall between two"
+    },
+    {
+      "start": 1366.44,
+      "duration": 4.26,
+      "text": "dates and that can be very useful for"
+    },
+    {
+      "start": 1368.36,
+      "duration": 4.08,
+      "text": "performing date based analysis and we're"
+    },
+    {
+      "start": 1370.7,
+      "duration": 4.02,
+      "text": "going to see more of that later in the"
+    },
+    {
+      "start": 1372.44,
+      "duration": 4.56,
+      "text": "series let's now move on to ordering"
+    },
+    {
+      "start": 1374.72,
+      "duration": 4.199,
+      "text": "records in Django query sets so when you"
+    },
+    {
+      "start": 1377.0,
+      "duration": 4.5,
+      "text": "query a database you often want to get"
+    },
+    {
+      "start": 1378.919,
+      "duration": 4.981,
+      "text": "back records in some sort of order and"
+    },
+    {
+      "start": 1381.5,
+      "duration": 4.38,
+      "text": "SQL has a statement called ordered by"
+    },
+    {
+      "start": 1383.9,
+      "duration": 3.96,
+      "text": "which can be used to achieve this Now"
+    },
+    {
+      "start": 1385.88,
+      "duration": 5.22,
+      "text": "the default ordering and a Django model"
+    },
+    {
+      "start": 1387.86,
+      "duration": 5.28,
+      "text": "is by the primary key of the particular"
+    },
+    {
+      "start": 1391.1,
+      "duration": 4.4,
+      "text": "model and that's usually an ID field"
+    },
+    {
+      "start": 1393.14,
+      "duration": 4.019,
+      "text": "that's numerical so when you call"
+    },
+    {
+      "start": 1395.5,
+      "duration": 3.64,
+      "text": "restaurant.objects.org you get back a"
+    },
+    {
+      "start": 1397.159,
+      "duration": 3.961,
+      "text": "query set that contains all of the rows"
+    },
+    {
+      "start": 1399.14,
+      "duration": 3.779,
+      "text": "in the database but they are ordered"
+    },
+    {
+      "start": 1401.12,
+      "duration": 4.26,
+      "text": "they're ordered by the primary key of"
+    },
+    {
+      "start": 1402.919,
+      "duration": 3.961,
+      "text": "the table the ID but you can override"
+    },
+    {
+      "start": 1405.38,
+      "duration": 2.94,
+      "text": "this if you want and we're going to see"
+    },
+    {
+      "start": 1406.88,
+      "duration": 3.659,
+      "text": "how to do that now so I'm going to"
+    },
+    {
+      "start": 1408.32,
+      "duration": 5.18,
+      "text": "remove these two lines of code I'm going"
+    },
+    {
+      "start": 1410.539,
+      "duration": 5.161,
+      "text": "to fetch the restaurants by using the"
+    },
+    {
+      "start": 1413.5,
+      "duration": 3.7,
+      "text": "restaurant.objects.order by function and"
+    },
+    {
+      "start": 1415.7,
+      "duration": 3.959,
+      "text": "the order by function allows you to"
+    },
+    {
+      "start": 1417.2,
+      "duration": 4.38,
+      "text": "specify an ordering to get back a query"
+    },
+    {
+      "start": 1419.659,
+      "duration": 3.9,
+      "text": "set of Records in a particular order and"
+    },
+    {
+      "start": 1421.58,
+      "duration": 3.42,
+      "text": "you can order by a particular Fields"
+    },
+    {
+      "start": 1423.559,
+      "duration": 3.661,
+      "text": "values in our case we're going to get"
+    },
+    {
+      "start": 1425.0,
+      "duration": 4.08,
+      "text": "back the restaurants ordered by the name"
+    },
+    {
+      "start": 1427.22,
+      "duration": 4.199,
+      "text": "value so let's print these restaurants"
+    },
+    {
+      "start": 1429.08,
+      "duration": 4.02,
+      "text": "to the terminal and we can execute the"
+    },
+    {
+      "start": 1431.419,
+      "duration": 3.181,
+      "text": "script and you can see the output at the"
+    },
+    {
+      "start": 1433.1,
+      "duration": 3.3,
+      "text": "top here we have the restaurants in a"
+    },
+    {
+      "start": 1434.6,
+      "duration": 2.939,
+      "text": "query set and these are ordered by the"
+    },
+    {
+      "start": 1436.4,
+      "duration": 4.86,
+      "text": "name so you can see the name beginning"
+    },
+    {
+      "start": 1437.539,
+      "duration": 5.281,
+      "text": "with b then C then G and so on and if we"
+    },
+    {
+      "start": 1441.26,
+      "duration": 3.96,
+      "text": "look at the SQL statement you can see"
+    },
+    {
+      "start": 1442.82,
+      "duration": 4.68,
+      "text": "the order by statement appearing in that"
+    },
+    {
+      "start": 1445.22,
+      "duration": 4.14,
+      "text": "SQL and we're ordering by this"
+    },
+    {
+      "start": 1447.5,
+      "duration": 4.08,
+      "text": "particular field called name and we're"
+    },
+    {
+      "start": 1449.36,
+      "duration": 4.559,
+      "text": "doing that in ascending order by default"
+    },
+    {
+      "start": 1451.58,
+      "duration": 4.38,
+      "text": "and ascending order for textual data"
+    },
+    {
+      "start": 1453.919,
+      "duration": 4.081,
+      "text": "means we're starting at the letter a and"
+    },
+    {
+      "start": 1455.96,
+      "duration": 5.04,
+      "text": "we're getting back all records in order"
+    },
+    {
+      "start": 1458.0,
+      "duration": 5.159,
+      "text": "up to the letter Z so this allows us to"
+    },
+    {
+      "start": 1461.0,
+      "duration": 4.08,
+      "text": "customize The Ordering of a query set"
+    },
+    {
+      "start": 1463.159,
+      "duration": 3.661,
+      "text": "and we can use djangles order by"
+    },
+    {
+      "start": 1465.08,
+      "duration": 3.36,
+      "text": "function to do that but what if you"
+    },
+    {
+      "start": 1466.82,
+      "duration": 3.359,
+      "text": "wanted to order it the other way around"
+    },
+    {
+      "start": 1468.44,
+      "duration": 3.66,
+      "text": "for example if we wanted the restaurants"
+    },
+    {
+      "start": 1470.179,
+      "duration": 3.661,
+      "text": "that begin with a later letter first"
+    },
+    {
+      "start": 1472.1,
+      "duration": 3.42,
+      "text": "what we could do is because we have"
+    },
+    {
+      "start": 1473.84,
+      "duration": 3.24,
+      "text": "these in order of the name we could use"
+    },
+    {
+      "start": 1475.52,
+      "duration": 3.899,
+      "text": "the dot reverse function which is"
+    },
+    {
+      "start": 1477.08,
+      "duration": 4.38,
+      "text": "another function on Django query sets if"
+    },
+    {
+      "start": 1479.419,
+      "duration": 3.781,
+      "text": "we chain that to the order by and then"
+    },
+    {
+      "start": 1481.46,
+      "duration": 3.36,
+      "text": "re-execute the script you can see we get"
+    },
+    {
+      "start": 1483.2,
+      "duration": 3.599,
+      "text": "back the restaurants in the reverse"
+    },
+    {
+      "start": 1484.82,
+      "duration": 3.719,
+      "text": "order and looking at the SQL you can see"
+    },
+    {
+      "start": 1486.799,
+      "duration": 3.601,
+      "text": "the order by statement this time we're"
+    },
+    {
+      "start": 1488.539,
+      "duration": 3.901,
+      "text": "looking at the name field but we have a"
+    },
+    {
+      "start": 1490.4,
+      "duration": 4.019,
+      "text": "descending argument after that so it's"
+    },
+    {
+      "start": 1492.44,
+      "duration": 3.9,
+      "text": "going to get the records from top to"
+    },
+    {
+      "start": 1494.419,
+      "duration": 4.021,
+      "text": "bottom essentially so that's one way of"
+    },
+    {
+      "start": 1496.34,
+      "duration": 4.319,
+      "text": "doing it we call order by we pass the"
+    },
+    {
+      "start": 1498.44,
+      "duration": 4.619,
+      "text": "field and then we can reverse the query"
+    },
+    {
+      "start": 1500.659,
+      "duration": 4.741,
+      "text": "set what we can also do is we can pass a"
+    },
+    {
+      "start": 1503.059,
+      "duration": 4.381,
+      "text": "minus to the field name like this and"
+    },
+    {
+      "start": 1505.4,
+      "duration": 4.139,
+      "text": "this is a Django specific syntax where"
+    },
+    {
+      "start": 1507.44,
+      "duration": 4.14,
+      "text": "we're telling Django just by using this"
+    },
+    {
+      "start": 1509.539,
+      "duration": 4.5,
+      "text": "minus operator that we want the values"
+    },
+    {
+      "start": 1511.58,
+      "duration": 4.32,
+      "text": "back in reverse order so let's save that"
+    },
+    {
+      "start": 1514.039,
+      "duration": 3.601,
+      "text": "and execute the script again and this"
+    },
+    {
+      "start": 1515.9,
+      "duration": 3.779,
+      "text": "gives us back the same results as we go"
+    },
+    {
+      "start": 1517.64,
+      "duration": 3.6,
+      "text": "when we called order by and then the"
+    },
+    {
+      "start": 1519.679,
+      "duration": 3.961,
+      "text": "reverse function and you can see that"
+    },
+    {
+      "start": 1521.24,
+      "duration": 4.14,
+      "text": "descending keyword in this order by"
+    },
+    {
+      "start": 1523.64,
+      "duration": 3.539,
+      "text": "close and this is going to return all"
+    },
+    {
+      "start": 1525.38,
+      "duration": 4.38,
+      "text": "the restaurants where the name field is"
+    },
+    {
+      "start": 1527.179,
+      "duration": 4.321,
+      "text": "ordered from top to bottom and the query"
+    },
+    {
+      "start": 1529.76,
+      "duration": 3.539,
+      "text": "set and this works with any field it"
+    },
+    {
+      "start": 1531.5,
+      "duration": 4.14,
+      "text": "doesn't just work with textual data you"
+    },
+    {
+      "start": 1533.299,
+      "duration": 3.961,
+      "text": "can use this with numerical data and you"
+    },
+    {
+      "start": 1535.64,
+      "duration": 3.36,
+      "text": "can use it with date time Fields as well"
+    },
+    {
+      "start": 1537.26,
+      "duration": 4.799,
+      "text": "for example if you wanted to get back"
+    },
+    {
+      "start": 1539.0,
+      "duration": 4.919,
+      "text": "all sales we have in the sale table our"
+    },
+    {
+      "start": 1542.059,
+      "duration": 3.48,
+      "text": "date time field that captures when the"
+    },
+    {
+      "start": 1543.919,
+      "duration": 3.541,
+      "text": "sale occurred so if you wanted to get"
+    },
+    {
+      "start": 1545.539,
+      "duration": 4.76,
+      "text": "back the most recent sales we can go to"
+    },
+    {
+      "start": 1547.46,
+      "duration": 4.5,
+      "text": "our orm script here and we can use the"
+    },
+    {
+      "start": 1550.299,
+      "duration": 3.941,
+      "text": "sale.objects.order by and this time"
+    },
+    {
+      "start": 1551.96,
+      "duration": 4.14,
+      "text": "we're going to pass the minus date time"
+    },
+    {
+      "start": 1554.24,
+      "duration": 4.02,
+      "text": "to that this is going to return the most"
+    },
+    {
+      "start": 1556.1,
+      "duration": 4.5,
+      "text": "recent date times to us earliest in the"
+    },
+    {
+      "start": 1558.26,
+      "duration": 4.74,
+      "text": "query section so let's execute this and"
+    },
+    {
+      "start": 1560.6,
+      "duration": 3.9,
+      "text": "we can go to the terminal here and you"
+    },
+    {
+      "start": 1563.0,
+      "duration": 3.299,
+      "text": "can see we are getting back a bunch of"
+    },
+    {
+      "start": 1564.5,
+      "duration": 3.659,
+      "text": "sale objects but if we look at the order"
+    },
+    {
+      "start": 1566.299,
+      "duration": 3.901,
+      "text": "by statement it's ordering by the date"
+    },
+    {
+      "start": 1568.159,
+      "duration": 3.961,
+      "text": "time and again it's in descending order"
+    },
+    {
+      "start": 1570.2,
+      "duration": 3.959,
+      "text": "now I'm going to bring back the code for"
+    },
+    {
+      "start": 1572.12,
+      "duration": 4.14,
+      "text": "getting the restaurants ordered by the"
+    },
+    {
+      "start": 1574.159,
+      "duration": 4.441,
+      "text": "name now there's one problem with this"
+    },
+    {
+      "start": 1576.26,
+      "duration": 4.32,
+      "text": "statement for textual data and that's"
+    },
+    {
+      "start": 1578.6,
+      "duration": 4.199,
+      "text": "that it doesn't take into account the"
+    },
+    {
+      "start": 1580.58,
+      "duration": 4.14,
+      "text": "case of the restaurant names that are in"
+    },
+    {
+      "start": 1582.799,
+      "duration": 3.301,
+      "text": "the database so what happens if some"
+    },
+    {
+      "start": 1584.72,
+      "duration": 3.42,
+      "text": "restaurants begin with lowercase"
+    },
+    {
+      "start": 1586.1,
+      "duration": 3.959,
+      "text": "characters in the database and others"
+    },
+    {
+      "start": 1588.14,
+      "duration": 3.899,
+      "text": "with uppercase characters let's"
+    },
+    {
+      "start": 1590.059,
+      "duration": 3.48,
+      "text": "demonstrate this problem by pulling a"
+    },
+    {
+      "start": 1592.039,
+      "duration": 3.02,
+      "text": "restaurant out of the database so we can"
+    },
+    {
+      "start": 1593.539,
+      "duration": 3.181,
+      "text": "do that with"
+    },
+    {
+      "start": 1595.059,
+      "duration": 3.281,
+      "text": "restaurant.objects.first and what I'm"
+    },
+    {
+      "start": 1596.72,
+      "duration": 3.0,
+      "text": "going to do is reset the name of the"
+    },
+    {
+      "start": 1598.34,
+      "duration": 3.0,
+      "text": "restaurant so we're going to use the"
+    },
+    {
+      "start": 1599.72,
+      "duration": 3.839,
+      "text": "existing name but we're going to convert"
+    },
+    {
+      "start": 1601.34,
+      "duration": 4.319,
+      "text": "it to lowercase once we've done that we"
+    },
+    {
+      "start": 1603.559,
+      "duration": 3.661,
+      "text": "can save the new value to the database"
+    },
+    {
+      "start": 1605.659,
+      "duration": 3.721,
+      "text": "and then we're going to see an example"
+    },
+    {
+      "start": 1607.22,
+      "duration": 4.14,
+      "text": "of what's going wrong here when we run"
+    },
+    {
+      "start": 1609.38,
+      "duration": 3.419,
+      "text": "this script again so let's run it so if"
+    },
+    {
+      "start": 1611.36,
+      "duration": 3.24,
+      "text": "we look at the query set that's coming"
+    },
+    {
+      "start": 1612.799,
+      "duration": 4.321,
+      "text": "back here you can see we have everything"
+    },
+    {
+      "start": 1614.6,
+      "duration": 4.679,
+      "text": "ordered by the name as before but we"
+    },
+    {
+      "start": 1617.12,
+      "duration": 4.02,
+      "text": "have at the end here a restaurant called"
+    },
+    {
+      "start": 1619.279,
+      "duration": 4.801,
+      "text": "Pizzeria one and this begins with the"
+    },
+    {
+      "start": 1621.14,
+      "duration": 4.86,
+      "text": "letter P but it's a lowercase p and this"
+    },
+    {
+      "start": 1624.08,
+      "duration": 4.44,
+      "text": "comes after other restaurants such as"
+    },
+    {
+      "start": 1626.0,
+      "duration": 4.74,
+      "text": "Taco Bell and that's a problem because"
+    },
+    {
+      "start": 1628.52,
+      "duration": 4.62,
+      "text": "we're ordering by the name and we don't"
+    },
+    {
+      "start": 1630.74,
+      "duration": 4.38,
+      "text": "particularly care about the case here we"
+    },
+    {
+      "start": 1633.14,
+      "duration": 4.74,
+      "text": "want to make sure that the returned"
+    },
+    {
+      "start": 1635.12,
+      "duration": 4.86,
+      "text": "values are case and sensitive so how can"
+    },
+    {
+      "start": 1637.88,
+      "duration": 3.899,
+      "text": "we do that in Django when we have a text"
+    },
+    {
+      "start": 1639.98,
+      "duration": 3.9,
+      "text": "field and we're ordering by that field"
+    },
+    {
+      "start": 1641.779,
+      "duration": 4.621,
+      "text": "but that particular text field might"
+    },
+    {
+      "start": 1643.88,
+      "duration": 4.44,
+      "text": "have different cases as the first letter"
+    },
+    {
+      "start": 1646.4,
+      "duration": 3.84,
+      "text": "now it turns out that Django allows you"
+    },
+    {
+      "start": 1648.32,
+      "duration": 3.06,
+      "text": "to execute database functions when"
+    },
+    {
+      "start": 1650.24,
+      "duration": 2.22,
+      "text": "you're running queries so what we're"
+    },
+    {
+      "start": 1651.38,
+      "duration": 4.46,
+      "text": "going to do is we're going to bring an"
+    },
+    {
+      "start": 1652.46,
+      "duration": 4.92,
+      "text": "import in at the top here from"
+    },
+    {
+      "start": 1655.84,
+      "duration": 4.0,
+      "text": "django.db.models.functions we're going"
+    },
+    {
+      "start": 1657.38,
+      "duration": 4.32,
+      "text": "to import a function called Lore and we"
+    },
+    {
+      "start": 1659.84,
+      "duration": 4.14,
+      "text": "can use that in the order by Clause to"
+    },
+    {
+      "start": 1661.7,
+      "duration": 4.38,
+      "text": "lowercase the values in a particular"
+    },
+    {
+      "start": 1663.98,
+      "duration": 4.14,
+      "text": "column when we're doing the ordering and"
+    },
+    {
+      "start": 1666.08,
+      "duration": 4.079,
+      "text": "that will result in a case insensitive"
+    },
+    {
+      "start": 1668.12,
+      "duration": 3.48,
+      "text": "ordering at the end of that process so"
+    },
+    {
+      "start": 1670.159,
+      "duration": 3.0,
+      "text": "what I'm going to do is remove these"
+    },
+    {
+      "start": 1671.6,
+      "duration": 3.959,
+      "text": "three lines of code and we're going to"
+    },
+    {
+      "start": 1673.159,
+      "duration": 4.321,
+      "text": "use the lower function directly in the"
+    },
+    {
+      "start": 1675.559,
+      "duration": 3.6,
+      "text": "order by statement here and we pass the"
+    },
+    {
+      "start": 1677.48,
+      "duration": 3.72,
+      "text": "name of the field that we want to apply"
+    },
+    {
+      "start": 1679.159,
+      "duration": 4.321,
+      "text": "the lower casing too so that's the name"
+    },
+    {
+      "start": 1681.2,
+      "duration": 4.74,
+      "text": "field and that is going to be used as"
+    },
+    {
+      "start": 1683.48,
+      "duration": 4.559,
+      "text": "the values to the order by function so"
+    },
+    {
+      "start": 1685.94,
+      "duration": 3.96,
+      "text": "let's now execute this script and we can"
+    },
+    {
+      "start": 1688.039,
+      "duration": 3.901,
+      "text": "look at the output at the top here you"
+    },
+    {
+      "start": 1689.9,
+      "duration": 4.32,
+      "text": "can see this time we have the pizzeria 1"
+    },
+    {
+      "start": 1691.94,
+      "duration": 4.44,
+      "text": "appearing in the correct place within"
+    },
+    {
+      "start": 1694.22,
+      "duration": 4.62,
+      "text": "the resulting query set so in order to"
+    },
+    {
+      "start": 1696.38,
+      "duration": 4.62,
+      "text": "get a case insensitive ordering we are"
+    },
+    {
+      "start": 1698.84,
+      "duration": 4.8,
+      "text": "using the lower function on the name"
+    },
+    {
+      "start": 1701.0,
+      "duration": 4.44,
+      "text": "field and passing that to order by and"
+    },
+    {
+      "start": 1703.64,
+      "duration": 3.419,
+      "text": "if we look at the SQL that's executed"
+    },
+    {
+      "start": 1705.44,
+      "duration": 4.02,
+      "text": "here we can see that we're actually"
+    },
+    {
+      "start": 1707.059,
+      "duration": 5.461,
+      "text": "executing a database function called"
+    },
+    {
+      "start": 1709.46,
+      "duration": 4.98,
+      "text": "Lore to lowercase the restaurant name as"
+    },
+    {
+      "start": 1712.52,
+      "duration": 3.659,
+      "text": "we're doing the ordering so Django's"
+    },
+    {
+      "start": 1714.44,
+      "duration": 4.08,
+      "text": "function modules allows you to execute"
+    },
+    {
+      "start": 1716.179,
+      "duration": 4.5,
+      "text": "functions at the database layer and this"
+    },
+    {
+      "start": 1718.52,
+      "duration": 4.139,
+      "text": "can be useful to do your processing on"
+    },
+    {
+      "start": 1720.679,
+      "duration": 4.38,
+      "text": "the database server rather than pulling"
+    },
+    {
+      "start": 1722.659,
+      "duration": 4.561,
+      "text": "values into Python and then having to"
+    },
+    {
+      "start": 1725.059,
+      "duration": 3.781,
+      "text": "amend all of those values in your code"
+    },
+    {
+      "start": 1727.22,
+      "duration": 3.48,
+      "text": "base so let's demonstrate a few other"
+    },
+    {
+      "start": 1728.84,
+      "duration": 3.66,
+      "text": "things with ordering here we're going to"
+    },
+    {
+      "start": 1730.7,
+      "duration": 3.599,
+      "text": "show that we can actually use this with"
+    },
+    {
+      "start": 1732.5,
+      "duration": 3.26,
+      "text": "date time Fields now we've already shown"
+    },
+    {
+      "start": 1734.299,
+      "duration": 3.541,
+      "text": "this but what I'm going to do is go to"
+    },
+    {
+      "start": 1735.76,
+      "duration": 4.419,
+      "text": "models.pi if we look at the restaurant"
+    },
+    {
+      "start": 1737.84,
+      "duration": 4.26,
+      "text": "model up here we have a date open field"
+    },
+    {
+      "start": 1740.179,
+      "duration": 4.141,
+      "text": "so I'm going to quickly show an ordering"
+    },
+    {
+      "start": 1742.1,
+      "duration": 3.9,
+      "text": "by that so we can remove the call to"
+    },
+    {
+      "start": 1744.32,
+      "duration": 4.08,
+      "text": "lower here and we're going to paste in"
+    },
+    {
+      "start": 1746.0,
+      "duration": 4.5,
+      "text": "the field date opened so let's save that"
+    },
+    {
+      "start": 1748.4,
+      "duration": 4.32,
+      "text": "and execute the script and when we order"
+    },
+    {
+      "start": 1750.5,
+      "duration": 4.02,
+      "text": "by the date open field what it's going"
+    },
+    {
+      "start": 1752.72,
+      "duration": 3.48,
+      "text": "to return first of all here is the"
+    },
+    {
+      "start": 1754.52,
+      "duration": 4.2,
+      "text": "restaurant that was opened at the"
+    },
+    {
+      "start": 1756.2,
+      "duration": 5.04,
+      "text": "earliest date up until the restaurant"
+    },
+    {
+      "start": 1758.72,
+      "duration": 3.9,
+      "text": "was opened at the latest date now we've"
+    },
+    {
+      "start": 1761.24,
+      "duration": 2.939,
+      "text": "already seen that with the seal model"
+    },
+    {
+      "start": 1762.62,
+      "duration": 4.14,
+      "text": "but I want to show something else here"
+    },
+    {
+      "start": 1764.179,
+      "duration": 5.281,
+      "text": "and that's how to index into a query set"
+    },
+    {
+      "start": 1766.76,
+      "duration": 4.74,
+      "text": "now we can index in at element 0 here"
+    },
+    {
+      "start": 1769.46,
+      "duration": 4.68,
+      "text": "and if we execute the script and look at"
+    },
+    {
+      "start": 1771.5,
+      "duration": 5.52,
+      "text": "what we get back we get back a model so"
+    },
+    {
+      "start": 1774.14,
+      "duration": 5.399,
+      "text": "when we index in at one particular index"
+    },
+    {
+      "start": 1777.02,
+      "duration": 4.32,
+      "text": "Django will see that indexing in a"
+    },
+    {
+      "start": 1779.539,
+      "duration": 5.161,
+      "text": "particular element and it will convert"
+    },
+    {
+      "start": 1781.34,
+      "duration": 5.579,
+      "text": "that to a limit clause in SQL now limit"
+    },
+    {
+      "start": 1784.7,
+      "duration": 4.079,
+      "text": "is an SQL keyword and it's used to"
+    },
+    {
+      "start": 1786.919,
+      "duration": 4.26,
+      "text": "control the number of rows that are"
+    },
+    {
+      "start": 1788.779,
+      "duration": 4.201,
+      "text": "being returned to the caller and when we"
+    },
+    {
+      "start": 1791.179,
+      "duration": 3.781,
+      "text": "limit to one here it's going to return a"
+    },
+    {
+      "start": 1792.98,
+      "duration": 4.079,
+      "text": "single row and that's because we have"
+    },
+    {
+      "start": 1794.96,
+      "duration": 3.599,
+      "text": "index then and our indexing doesn't"
+    },
+    {
+      "start": 1797.059,
+      "duration": 3.72,
+      "text": "contain any slices we're a hard"
+    },
+    {
+      "start": 1798.559,
+      "duration": 3.961,
+      "text": "recording an actual index an actual"
+    },
+    {
+      "start": 1800.779,
+      "duration": 4.321,
+      "text": "number here so it's going to return a"
+    },
+    {
+      "start": 1802.52,
+      "duration": 4.32,
+      "text": "single model to us not a query set now"
+    },
+    {
+      "start": 1805.1,
+      "duration": 3.959,
+      "text": "if we use a slice for example we could"
+    },
+    {
+      "start": 1806.84,
+      "duration": 4.38,
+      "text": "get the first five records in the"
+    },
+    {
+      "start": 1809.059,
+      "duration": 4.321,
+      "text": "restaurant table in order of the ones"
+    },
+    {
+      "start": 1811.22,
+      "duration": 4.559,
+      "text": "that were opened earliest if we execute"
+    },
+    {
+      "start": 1813.38,
+      "duration": 3.659,
+      "text": "this and look at the results this time"
+    },
+    {
+      "start": 1815.779,
+      "duration": 3.181,
+      "text": "we're getting back a query set"
+    },
+    {
+      "start": 1817.039,
+      "duration": 3.661,
+      "text": "containing five restaurants and you can"
+    },
+    {
+      "start": 1818.96,
+      "duration": 3.54,
+      "text": "see in the query that's being executed"
+    },
+    {
+      "start": 1820.7,
+      "duration": 4.5,
+      "text": "here we're ordering by the date open"
+    },
+    {
+      "start": 1822.5,
+      "duration": 4.919,
+      "text": "field and we're limiting to only five"
+    },
+    {
+      "start": 1825.2,
+      "duration": 4.26,
+      "text": "results in the output and that's again"
+    },
+    {
+      "start": 1827.419,
+      "duration": 4.081,
+      "text": "because this time we're using a slice"
+    },
+    {
+      "start": 1829.46,
+      "duration": 3.9,
+      "text": "operator and we're slicing into the"
+    },
+    {
+      "start": 1831.5,
+      "duration": 4.74,
+      "text": "query set and we're getting the first"
+    },
+    {
+      "start": 1833.36,
+      "duration": 4.439,
+      "text": "five records in the database table now"
+    },
+    {
+      "start": 1836.24,
+      "duration": 4.14,
+      "text": "what if we wanted to get all records"
+    },
+    {
+      "start": 1837.799,
+      "duration": 4.321,
+      "text": "between two and five here we can use"
+    },
+    {
+      "start": 1840.38,
+      "duration": 4.38,
+      "text": "this notation and this is just coming"
+    },
+    {
+      "start": 1842.12,
+      "duration": 4.439,
+      "text": "from python list indexing notation this"
+    },
+    {
+      "start": 1844.76,
+      "duration": 4.139,
+      "text": "will give us back all records between"
+    },
+    {
+      "start": 1846.559,
+      "duration": 5.1,
+      "text": "two and five so let's now see the"
+    },
+    {
+      "start": 1848.899,
+      "duration": 4.5,
+      "text": "resulting SQL query for this one if we"
+    },
+    {
+      "start": 1851.659,
+      "duration": 3.781,
+      "text": "expand that you can see we get back"
+    },
+    {
+      "start": 1853.399,
+      "duration": 4.441,
+      "text": "three restaurants and this time we can"
+    },
+    {
+      "start": 1855.44,
+      "duration": 4.26,
+      "text": "see a new keyword in the SQL statement"
+    },
+    {
+      "start": 1857.84,
+      "duration": 3.66,
+      "text": "and that's the offset set so the query"
+    },
+    {
+      "start": 1859.7,
+      "duration": 3.9,
+      "text": "that's being executed gets back all"
+    },
+    {
+      "start": 1861.5,
+      "duration": 4.44,
+      "text": "restaurants from the database in order"
+    },
+    {
+      "start": 1863.6,
+      "duration": 4.439,
+      "text": "of date opened but at the end of the"
+    },
+    {
+      "start": 1865.94,
+      "duration": 4.02,
+      "text": "statement we're limiting to only three"
+    },
+    {
+      "start": 1868.039,
+      "duration": 4.14,
+      "text": "rows being returned but we're also"
+    },
+    {
+      "start": 1869.96,
+      "duration": 4.199,
+      "text": "offsetting by two and that's because if"
+    },
+    {
+      "start": 1872.179,
+      "duration": 4.5,
+      "text": "we go back to the code here we are"
+    },
+    {
+      "start": 1874.159,
+      "duration": 4.26,
+      "text": "indexing in with this particular slice"
+    },
+    {
+      "start": 1876.679,
+      "duration": 4.38,
+      "text": "in Python we're starting at element two"
+    },
+    {
+      "start": 1878.419,
+      "duration": 4.74,
+      "text": "and up to element five so that's going"
+    },
+    {
+      "start": 1881.059,
+      "duration": 4.62,
+      "text": "to return a query set of three models"
+    },
+    {
+      "start": 1883.159,
+      "duration": 4.38,
+      "text": "and we're offsetting the results by two"
+    },
+    {
+      "start": 1885.679,
+      "duration": 3.901,
+      "text": "because of that indexing now I'm going"
+    },
+    {
+      "start": 1887.539,
+      "duration": 4.38,
+      "text": "to finish this section on ordering by"
+    },
+    {
+      "start": 1889.58,
+      "duration": 4.38,
+      "text": "looking at a default way of ordering"
+    },
+    {
+      "start": 1891.919,
+      "duration": 4.321,
+      "text": "your model so what I'm going to do is go"
+    },
+    {
+      "start": 1893.96,
+      "duration": 4.38,
+      "text": "to models.pi and in fact I'm going to"
+    },
+    {
+      "start": 1896.24,
+      "duration": 4.74,
+      "text": "copy this import of the lore function"
+    },
+    {
+      "start": 1898.34,
+      "duration": 4.86,
+      "text": "out of the script and into the top of"
+    },
+    {
+      "start": 1900.98,
+      "duration": 4.26,
+      "text": "the models.pi file and you can set a"
+    },
+    {
+      "start": 1903.2,
+      "duration": 3.78,
+      "text": "default ordering on a Django model for"
+    },
+    {
+      "start": 1905.24,
+      "duration": 3.539,
+      "text": "example we're going to do that on the"
+    },
+    {
+      "start": 1906.98,
+      "duration": 4.26,
+      "text": "restaurant model here and you can do"
+    },
+    {
+      "start": 1908.779,
+      "duration": 4.38,
+      "text": "that by defining our meta class in your"
+    },
+    {
+      "start": 1911.24,
+      "duration": 3.9,
+      "text": "Django model so let's define an inner"
+    },
+    {
+      "start": 1913.159,
+      "duration": 4.321,
+      "text": "class here called meta and this is a"
+    },
+    {
+      "start": 1915.14,
+      "duration": 4.8,
+      "text": "common practice in Django the metaclass"
+    },
+    {
+      "start": 1917.48,
+      "duration": 4.98,
+      "text": "can provide option are applied to your"
+    },
+    {
+      "start": 1919.94,
+      "duration": 4.5,
+      "text": "Django models now the metaclasses are"
+    },
+    {
+      "start": 1922.46,
+      "duration": 4.74,
+      "text": "field called ordering that you can set"
+    },
+    {
+      "start": 1924.44,
+      "duration": 5.28,
+      "text": "to a tuple or a list that will specify"
+    },
+    {
+      "start": 1927.2,
+      "duration": 4.8,
+      "text": "the default ordering for that particular"
+    },
+    {
+      "start": 1929.72,
+      "duration": 3.839,
+      "text": "model when it's retrieved with a query"
+    },
+    {
+      "start": 1932.0,
+      "duration": 4.2,
+      "text": "set so what we're going to set this to"
+    },
+    {
+      "start": 1933.559,
+      "duration": 4.021,
+      "text": "is the lower name field and by setting"
+    },
+    {
+      "start": 1936.2,
+      "duration": 3.66,
+      "text": "the ordering to this it means that when"
+    },
+    {
+      "start": 1937.58,
+      "duration": 4.44,
+      "text": "we call any operations on this model"
+    },
+    {
+      "start": 1939.86,
+      "duration": 3.84,
+      "text": "with the orm unless we specify a"
+    },
+    {
+      "start": 1942.02,
+      "duration": 4.2,
+      "text": "different ordering it's going to try and"
+    },
+    {
+      "start": 1943.7,
+      "duration": 5.16,
+      "text": "order it by this default ordering in our"
+    },
+    {
+      "start": 1946.22,
+      "duration": 4.679,
+      "text": "case by lowercasing the name field so"
+    },
+    {
+      "start": 1948.86,
+      "duration": 3.84,
+      "text": "let's go back to the orm script.pi and"
+    },
+    {
+      "start": 1950.899,
+      "duration": 3.681,
+      "text": "we can remove the dot order by call and"
+    },
+    {
+      "start": 1952.7,
+      "duration": 3.479,
+      "text": "what we're going to use here is"
+    },
+    {
+      "start": 1954.58,
+      "duration": 3.699,
+      "text": "restaurant.objects.org it's going to"
+    },
+    {
+      "start": 1956.179,
+      "duration": 4.141,
+      "text": "return all the restaurants to us when we"
+    },
+    {
+      "start": 1958.279,
+      "duration": 3.961,
+      "text": "execute this script below now we're not"
+    },
+    {
+      "start": 1960.32,
+      "duration": 4.62,
+      "text": "specifying any ordering here but you can"
+    },
+    {
+      "start": 1962.24,
+      "duration": 4.86,
+      "text": "see that there is an order by clause in"
+    },
+    {
+      "start": 1964.94,
+      "duration": 4.38,
+      "text": "the SQL that's being executed and again"
+    },
+    {
+      "start": 1967.1,
+      "duration": 3.959,
+      "text": "we're passing the lower function of this"
+    },
+    {
+      "start": 1969.32,
+      "duration": 3.78,
+      "text": "name field so if you have a default"
+    },
+    {
+      "start": 1971.059,
+      "duration": 3.781,
+      "text": "ordering that you want to use unless you"
+    },
+    {
+      "start": 1973.1,
+      "duration": 3.959,
+      "text": "specify otherwise then you can go to"
+    },
+    {
+      "start": 1974.84,
+      "duration": 4.38,
+      "text": "your model and Define a meta class if"
+    },
+    {
+      "start": 1977.059,
+      "duration": 4.5,
+      "text": "you don't already have it and as an"
+    },
+    {
+      "start": 1979.22,
+      "duration": 4.559,
+      "text": "ordering field into that meta class and"
+    },
+    {
+      "start": 1981.559,
+      "duration": 3.781,
+      "text": "you can pass a particular column in"
+    },
+    {
+      "start": 1983.779,
+      "duration": 3.661,
+      "text": "there and you can also use functions as"
+    },
+    {
+      "start": 1985.34,
+      "duration": 4.26,
+      "text": "you see here in order to control that"
+    },
+    {
+      "start": 1987.44,
+      "duration": 4.44,
+      "text": "ordering and if two rows have the same"
+    },
+    {
+      "start": 1989.6,
+      "duration": 3.78,
+      "text": "name then you can also pass additional"
+    },
+    {
+      "start": 1991.88,
+      "duration": 3.72,
+      "text": "values to that for example you may want"
+    },
+    {
+      "start": 1993.38,
+      "duration": 4.32,
+      "text": "to order by date opened if two"
+    },
+    {
+      "start": 1995.6,
+      "duration": 3.9,
+      "text": "restaurants have the same name we're"
+    },
+    {
+      "start": 1997.7,
+      "duration": 4.079,
+      "text": "just going to keep it to the name field"
+    },
+    {
+      "start": 1999.5,
+      "duration": 4.2,
+      "text": "and we're going to save this file and"
+    },
+    {
+      "start": 2001.779,
+      "duration": 4.38,
+      "text": "we're going to move on to the earliest"
+    },
+    {
+      "start": 2003.7,
+      "duration": 4.319,
+      "text": "and latest functions in Django now"
+    },
+    {
+      "start": 2006.159,
+      "duration": 4.26,
+      "text": "earliest and latest are kind of similar"
+    },
+    {
+      "start": 2008.019,
+      "duration": 4.321,
+      "text": "to the first and last functions and they"
+    },
+    {
+      "start": 2010.419,
+      "duration": 4.26,
+      "text": "are convenient when you're working with"
+    },
+    {
+      "start": 2012.34,
+      "duration": 4.559,
+      "text": "date time fields in Django let's go back"
+    },
+    {
+      "start": 2014.679,
+      "duration": 3.541,
+      "text": "to the orm script.pi and what we're"
+    },
+    {
+      "start": 2016.899,
+      "duration": 2.581,
+      "text": "going to fetch here is a single"
+    },
+    {
+      "start": 2018.22,
+      "duration": 3.179,
+      "text": "restaurant and we're going to get the"
+    },
+    {
+      "start": 2019.48,
+      "duration": 4.939,
+      "text": "restaurant that was opened at the"
+    },
+    {
+      "start": 2021.399,
+      "duration": 5.16,
+      "text": "earliest date so what we can use is"
+    },
+    {
+      "start": 2024.419,
+      "duration": 4.421,
+      "text": "restaurant.objects.airlist and we pass a"
+    },
+    {
+      "start": 2026.559,
+      "duration": 3.72,
+      "text": "field or a set of fields to that now the"
+    },
+    {
+      "start": 2028.84,
+      "duration": 4.02,
+      "text": "field we're going to use is the date"
+    },
+    {
+      "start": 2030.279,
+      "duration": 4.801,
+      "text": "open field that's a date time field so"
+    },
+    {
+      "start": 2032.86,
+      "duration": 4.319,
+      "text": "the concept of having an earliest record"
+    },
+    {
+      "start": 2035.08,
+      "duration": 3.3,
+      "text": "makes sense with a date so the dot"
+    },
+    {
+      "start": 2037.179,
+      "duration": 3.661,
+      "text": "earliest function is just a convey"
+    },
+    {
+      "start": 2038.38,
+      "duration": 4.44,
+      "text": "minions function it allows us to take a"
+    },
+    {
+      "start": 2040.84,
+      "duration": 4.199,
+      "text": "particular database table and get back"
+    },
+    {
+      "start": 2042.82,
+      "duration": 4.56,
+      "text": "our record and that record represents"
+    },
+    {
+      "start": 2045.039,
+      "duration": 4.501,
+      "text": "the earliest date opened from this"
+    },
+    {
+      "start": 2047.38,
+      "duration": 3.719,
+      "text": "particular set of restaurants if we"
+    },
+    {
+      "start": 2049.54,
+      "duration": 3.54,
+      "text": "execute the script and look at the"
+    },
+    {
+      "start": 2051.099,
+      "duration": 3.78,
+      "text": "output you can see that we get back a"
+    },
+    {
+      "start": 2053.08,
+      "duration": 4.2,
+      "text": "single model so dot earliest doesn't"
+    },
+    {
+      "start": 2054.879,
+      "duration": 4.681,
+      "text": "return a query set it returns a single"
+    },
+    {
+      "start": 2057.28,
+      "duration": 4.26,
+      "text": "model to the application and you can see"
+    },
+    {
+      "start": 2059.56,
+      "duration": 4.319,
+      "text": "the query has it ordered by the date"
+    },
+    {
+      "start": 2061.54,
+      "duration": 5.28,
+      "text": "opened and it's limiting to a single row"
+    },
+    {
+      "start": 2063.879,
+      "duration": 4.74,
+      "text": "of output so earliest for a date time is"
+    },
+    {
+      "start": 2066.82,
+      "duration": 3.72,
+      "text": "kind of similar to the DOT first method"
+    },
+    {
+      "start": 2068.619,
+      "duration": 4.8,
+      "text": "and there's an adjacent method called"
+    },
+    {
+      "start": 2070.54,
+      "duration": 4.799,
+      "text": "latest as well and if we execute that we"
+    },
+    {
+      "start": 2073.419,
+      "duration": 3.96,
+      "text": "can see the resulting query it's going"
+    },
+    {
+      "start": 2075.339,
+      "duration": 4.381,
+      "text": "to return another given restaurant again"
+    },
+    {
+      "start": 2077.379,
+      "duration": 4.921,
+      "text": "it's a model not a query set and again"
+    },
+    {
+      "start": 2079.72,
+      "duration": 4.439,
+      "text": "the order by statement is ordered by the"
+    },
+    {
+      "start": 2082.3,
+      "duration": 4.379,
+      "text": "date open that we're passing as a field"
+    },
+    {
+      "start": 2084.159,
+      "duration": 4.26,
+      "text": "to the dot latest function and this time"
+    },
+    {
+      "start": 2086.679,
+      "duration": 4.74,
+      "text": "it's in descending order and again"
+    },
+    {
+      "start": 2088.419,
+      "duration": 4.381,
+      "text": "limited to just a single row so earliest"
+    },
+    {
+      "start": 2091.419,
+      "duration": 3.0,
+      "text": "and latest are just convenience"
+    },
+    {
+      "start": 2092.8,
+      "duration": 3.599,
+      "text": "functions in Django when you have a date"
+    },
+    {
+      "start": 2094.419,
+      "duration": 4.381,
+      "text": "time field on a model and you want to"
+    },
+    {
+      "start": 2096.399,
+      "duration": 4.44,
+      "text": "get the earliest and latest rows from at"
+    },
+    {
+      "start": 2098.8,
+      "duration": 3.72,
+      "text": "that particular table based on that date"
+    },
+    {
+      "start": 2100.839,
+      "duration": 3.481,
+      "text": "time field and you can see we're passing"
+    },
+    {
+      "start": 2102.52,
+      "duration": 3.36,
+      "text": "the field to the model here but what we"
+    },
+    {
+      "start": 2104.32,
+      "duration": 3.96,
+      "text": "can actually do is we can go back to"
+    },
+    {
+      "start": 2105.88,
+      "duration": 5.1,
+      "text": "models.pi and we can pass another field"
+    },
+    {
+      "start": 2108.28,
+      "duration": 5.7,
+      "text": "to The Meta class and that's get latest"
+    },
+    {
+      "start": 2110.98,
+      "duration": 5.34,
+      "text": "buy and this can be set to any date time"
+    },
+    {
+      "start": 2113.98,
+      "duration": 4.619,
+      "text": "or date field in your model so we have"
+    },
+    {
+      "start": 2116.32,
+      "duration": 4.14,
+      "text": "the date opened date field here we're"
+    },
+    {
+      "start": 2118.599,
+      "duration": 3.541,
+      "text": "going to get the latest by this"
+    },
+    {
+      "start": 2120.46,
+      "duration": 4.8,
+      "text": "particular field and what that means is"
+    },
+    {
+      "start": 2122.14,
+      "duration": 4.979,
+      "text": "when we go back to the orm script.pi we"
+    },
+    {
+      "start": 2125.26,
+      "duration": 4.26,
+      "text": "can just call the dot latest function"
+    },
+    {
+      "start": 2127.119,
+      "duration": 4.141,
+      "text": "and it's going to by default apply it to"
+    },
+    {
+      "start": 2129.52,
+      "duration": 3.9,
+      "text": "that field in our model so let's"
+    },
+    {
+      "start": 2131.26,
+      "duration": 4.56,
+      "text": "re-execute this and we should see the"
+    },
+    {
+      "start": 2133.42,
+      "duration": 3.72,
+      "text": "same output of Pizzeria 3 here so if you"
+    },
+    {
+      "start": 2135.82,
+      "duration": 3.36,
+      "text": "have a date time field in your model"
+    },
+    {
+      "start": 2137.14,
+      "duration": 4.56,
+      "text": "that you're typically ordering by you"
+    },
+    {
+      "start": 2139.18,
+      "duration": 4.98,
+      "text": "can either use it as the ordering field"
+    },
+    {
+      "start": 2141.7,
+      "duration": 4.62,
+      "text": "itself or you can use the get latest buy"
+    },
+    {
+      "start": 2144.16,
+      "duration": 3.9,
+      "text": "and set it to that value and that can"
+    },
+    {
+      "start": 2146.32,
+      "duration": 3.9,
+      "text": "help you when you're wanting to get back"
+    },
+    {
+      "start": 2148.06,
+      "duration": 4.5,
+      "text": "the latest the most recent record from"
+    },
+    {
+      "start": 2150.22,
+      "duration": 4.68,
+      "text": "the database or the most distant the"
+    },
+    {
+      "start": 2152.56,
+      "duration": 3.6,
+      "text": "earliest record from the same table so"
+    },
+    {
+      "start": 2154.9,
+      "duration": 3.9,
+      "text": "this has been quite a long video let's"
+    },
+    {
+      "start": 2156.16,
+      "duration": 4.98,
+      "text": "finish by looking at how to filter by by"
+    },
+    {
+      "start": 2158.8,
+      "duration": 4.62,
+      "text": "Foreign key and Django so let's say we"
+    },
+    {
+      "start": 2161.14,
+      "duration": 4.5,
+      "text": "want to find all ratings associated with"
+    },
+    {
+      "start": 2163.42,
+      "duration": 4.32,
+      "text": "restaurants beginning with the letter c"
+    },
+    {
+      "start": 2165.64,
+      "duration": 4.28,
+      "text": "so let's remove this code here and we're"
+    },
+    {
+      "start": 2167.74,
+      "duration": 4.08,
+      "text": "going to set up a query here"
+    },
+    {
+      "start": 2169.92,
+      "duration": 3.4,
+      "text": "rating.objects.filter so this time we're"
+    },
+    {
+      "start": 2171.82,
+      "duration": 3.779,
+      "text": "using the rating model in our"
+    },
+    {
+      "start": 2173.32,
+      "duration": 3.62,
+      "text": "application racing has a foreign key to"
+    },
+    {
+      "start": 2175.599,
+      "duration": 3.541,
+      "text": "restaurant and that's called"
+    },
+    {
+      "start": 2176.94,
+      "duration": 4.899,
+      "text": "restaurant.field and we can use the two"
+    },
+    {
+      "start": 2179.14,
+      "duration": 4.68,
+      "text": "underscores to specify a lookup to that"
+    },
+    {
+      "start": 2181.839,
+      "duration": 4.141,
+      "text": "related object so the restaurant is the"
+    },
+    {
+      "start": 2183.82,
+      "duration": 4.259,
+      "text": "related object and it has a field called"
+    },
+    {
+      "start": 2185.98,
+      "duration": 3.84,
+      "text": "name what we want to do is get all"
+    },
+    {
+      "start": 2188.079,
+      "duration": 3.961,
+      "text": "restaurants whose name begins with the"
+    },
+    {
+      "start": 2189.82,
+      "duration": 4.2,
+      "text": "letter c so what we can do is chain I'll"
+    },
+    {
+      "start": 2192.04,
+      "duration": 3.78,
+      "text": "look up to that foreign key field and"
+    },
+    {
+      "start": 2194.02,
+      "duration": 3.9,
+      "text": "that's the starch with lookup and we can"
+    },
+    {
+      "start": 2195.82,
+      "duration": 4.259,
+      "text": "set that equal to the letter c let's"
+    },
+    {
+      "start": 2197.92,
+      "duration": 4.199,
+      "text": "store the value of this in a variable"
+    },
+    {
+      "start": 2200.079,
+      "duration": 3.901,
+      "text": "called ratings and let's just quickly go"
+    },
+    {
+      "start": 2202.119,
+      "duration": 3.72,
+      "text": "over the syntax one more time we're"
+    },
+    {
+      "start": 2203.98,
+      "duration": 4.26,
+      "text": "filtering the ratings and we're looking"
+    },
+    {
+      "start": 2205.839,
+      "duration": 4.561,
+      "text": "at only ratings whose restaurant's name"
+    },
+    {
+      "start": 2208.24,
+      "duration": 4.619,
+      "text": "begins with the letter c so we can use"
+    },
+    {
+      "start": 2210.4,
+      "duration": 4.439,
+      "text": "the start with lookup on this foreign"
+    },
+    {
+      "start": 2212.859,
+      "duration": 4.381,
+      "text": "key field called name so when we're"
+    },
+    {
+      "start": 2214.839,
+      "duration": 4.5,
+      "text": "filtering by a foreign key field we use"
+    },
+    {
+      "start": 2217.24,
+      "duration": 4.26,
+      "text": "the name of the film that refers to the"
+    },
+    {
+      "start": 2219.339,
+      "duration": 4.081,
+      "text": "following key we have two underscores to"
+    },
+    {
+      "start": 2221.5,
+      "duration": 4.2,
+      "text": "refer to any fields on that related"
+    },
+    {
+      "start": 2223.42,
+      "duration": 5.04,
+      "text": "object and finally we can also"
+    },
+    {
+      "start": 2225.7,
+      "duration": 4.5,
+      "text": "optionally do lookups as well to that"
+    },
+    {
+      "start": 2228.46,
+      "duration": 3.659,
+      "text": "particular field so let's print out"
+    },
+    {
+      "start": 2230.2,
+      "duration": 3.54,
+      "text": "these ratings to the terminal and"
+    },
+    {
+      "start": 2232.119,
+      "duration": 3.601,
+      "text": "execute the script and you can see a"
+    },
+    {
+      "start": 2233.74,
+      "duration": 3.66,
+      "text": "query set of ratings here and if we look"
+    },
+    {
+      "start": 2235.72,
+      "duration": 3.54,
+      "text": "at the SQL statement you can see we have"
+    },
+    {
+      "start": 2237.4,
+      "duration": 3.84,
+      "text": "a where Clause where we're looking at"
+    },
+    {
+      "start": 2239.26,
+      "duration": 4.02,
+      "text": "the restaurant name being like the"
+    },
+    {
+      "start": 2241.24,
+      "duration": 3.839,
+      "text": "letter c here but something to notice"
+    },
+    {
+      "start": 2243.28,
+      "duration": 3.96,
+      "text": "when we do this query is we're actually"
+    },
+    {
+      "start": 2245.079,
+      "duration": 4.741,
+      "text": "doing an inner join on the restaurant"
+    },
+    {
+      "start": 2247.24,
+      "duration": 4.379,
+      "text": "table and that join is being done by"
+    },
+    {
+      "start": 2249.82,
+      "duration": 3.779,
+      "text": "looking at the restaurant ID from the"
+    },
+    {
+      "start": 2251.619,
+      "duration": 3.72,
+      "text": "rating table that's the foreign key and"
+    },
+    {
+      "start": 2253.599,
+      "duration": 3.24,
+      "text": "it's joining that based on the equality"
+    },
+    {
+      "start": 2255.339,
+      "duration": 3.961,
+      "text": "where we're looking at the restaurant"
+    },
+    {
+      "start": 2256.839,
+      "duration": 4.201,
+      "text": "tables ID field so it does the join and"
+    },
+    {
+      "start": 2259.3,
+      "duration": 3.66,
+      "text": "then it does the filter where it only"
+    },
+    {
+      "start": 2261.04,
+      "duration": 4.38,
+      "text": "gets back the restaurants whose name"
+    },
+    {
+      "start": 2262.96,
+      "duration": 4.619,
+      "text": "begins with the letter c so when you do"
+    },
+    {
+      "start": 2265.42,
+      "duration": 4.08,
+      "text": "a filter like this in Django where"
+    },
+    {
+      "start": 2267.579,
+      "duration": 4.02,
+      "text": "you're doing the filter on a folding"
+    },
+    {
+      "start": 2269.5,
+      "duration": 5.099,
+      "text": "Keys field Django is going to translate"
+    },
+    {
+      "start": 2271.599,
+      "duration": 5.341,
+      "text": "that into a join statement in the SQL"
+    },
+    {
+      "start": 2274.599,
+      "duration": 4.02,
+      "text": "and let's see one final example in this"
+    },
+    {
+      "start": 2276.94,
+      "duration": 4.02,
+      "text": "video assume that we want to get get"
+    },
+    {
+      "start": 2278.619,
+      "duration": 4.261,
+      "text": "back all seals that belong to a Chinese"
+    },
+    {
+      "start": 2280.96,
+      "duration": 3.48,
+      "text": "restaurant let's change these variables"
+    },
+    {
+      "start": 2282.88,
+      "duration": 2.479,
+      "text": "we're going to refer to sales and it's"
+    },
+    {
+      "start": 2284.44,
+      "duration": 3.179,
+      "text": "going to be"
+    },
+    {
+      "start": 2285.359,
+      "duration": 4.061,
+      "text": "sale.objects.filter and again we are"
+    },
+    {
+      "start": 2287.619,
+      "duration": 3.361,
+      "text": "filtering by the restaurant but we can"
+    },
+    {
+      "start": 2289.42,
+      "duration": 3.06,
+      "text": "remove the rest of this this time we're"
+    },
+    {
+      "start": 2290.98,
+      "duration": 3.3,
+      "text": "going to look at the restaurant type"
+    },
+    {
+      "start": 2292.48,
+      "duration": 3.48,
+      "text": "field and we're going to look for"
+    },
+    {
+      "start": 2294.28,
+      "duration": 4.2,
+      "text": "restaurants that are Chinese restaurants"
+    },
+    {
+      "start": 2295.96,
+      "duration": 4.379,
+      "text": "in this query and we can print those to"
+    },
+    {
+      "start": 2298.48,
+      "duration": 3.78,
+      "text": "the terminal so let's execute the script"
+    },
+    {
+      "start": 2300.339,
+      "duration": 3.961,
+      "text": "and you can see again in the SQL we get"
+    },
+    {
+      "start": 2302.26,
+      "duration": 4.62,
+      "text": "back a query set of sales but we also"
+    },
+    {
+      "start": 2304.3,
+      "duration": 4.44,
+      "text": "have this inner join going on in the SQL"
+    },
+    {
+      "start": 2306.88,
+      "duration": 4.68,
+      "text": "statement and the sale Tables Restaurant"
+    },
+    {
+      "start": 2308.74,
+      "duration": 4.8,
+      "text": "ID foreign key column is being joined to"
+    },
+    {
+      "start": 2311.56,
+      "duration": 3.12,
+      "text": "the restaurant's ID and in the where"
+    },
+    {
+      "start": 2313.54,
+      "duration": 3.18,
+      "text": "Clause we're looking at the restaurant"
+    },
+    {
+      "start": 2314.68,
+      "duration": 3.78,
+      "text": "type and we're checking for those"
+    },
+    {
+      "start": 2316.72,
+      "duration": 3.84,
+      "text": "restaurants that are Chinese restaurants"
+    },
+    {
+      "start": 2318.46,
+      "duration": 4.8,
+      "text": "so I hope that demonstrates how to do"
+    },
+    {
+      "start": 2320.56,
+      "duration": 4.68,
+      "text": "foreign key filters in Django and that's"
+    },
+    {
+      "start": 2323.26,
+      "duration": 4.079,
+      "text": "all for this video we've covered quite a"
+    },
+    {
+      "start": 2325.24,
+      "duration": 3.599,
+      "text": "lot of Topics in this video we've looked"
+    },
+    {
+      "start": 2327.339,
+      "duration": 3.421,
+      "text": "more into the filter and exclude"
+    },
+    {
+      "start": 2328.839,
+      "duration": 3.901,
+      "text": "functions including how to use lookups"
+    },
+    {
+      "start": 2330.76,
+      "duration": 4.5,
+      "text": "with those functions we've looked at how"
+    },
+    {
+      "start": 2332.74,
+      "duration": 4.92,
+      "text": "to order records in Django using the"
+    },
+    {
+      "start": 2335.26,
+      "duration": 4.98,
+      "text": "order by function and also by using the"
+    },
+    {
+      "start": 2337.66,
+      "duration": 4.199,
+      "text": "ordering field of a meta class and we've"
+    },
+    {
+      "start": 2340.24,
+      "duration": 4.14,
+      "text": "looked at the earliest and latest"
+    },
+    {
+      "start": 2341.859,
+      "duration": 4.681,
+      "text": "functions that are defined on models"
+    },
+    {
+      "start": 2344.38,
+      "duration": 3.719,
+      "text": "that have a date time field and finally"
+    },
+    {
+      "start": 2346.54,
+      "duration": 3.78,
+      "text": "at the end here we've seen how to filter"
+    },
+    {
+      "start": 2348.099,
+      "duration": 4.141,
+      "text": "query sets based on the value of a"
+    },
+    {
+      "start": 2350.32,
+      "duration": 3.779,
+      "text": "foreign key field in the next video"
+    },
+    {
+      "start": 2352.24,
+      "duration": 3.54,
+      "text": "we're going to look at the N plus one"
+    },
+    {
+      "start": 2354.099,
+      "duration": 4.141,
+      "text": "problem in Django and we're going to"
+    },
+    {
+      "start": 2355.78,
+      "duration": 4.68,
+      "text": "look at how we can solve that using some"
+    },
+    {
+      "start": 2358.24,
+      "duration": 3.78,
+      "text": "of the utilities offered by the orm"
+    },
+    {
+      "start": 2360.46,
+      "duration": 4.02,
+      "text": "we're also going to look at a tool"
+    },
+    {
+      "start": 2362.02,
+      "duration": 3.839,
+      "text": "called Django debug toolbar and how that"
+    },
+    {
+      "start": 2364.48,
+      "duration": 3.78,
+      "text": "can help you when you're developing"
+    },
+    {
+      "start": 2365.859,
+      "duration": 3.781,
+      "text": "Django applications so thanks again for"
+    },
+    {
+      "start": 2368.26,
+      "duration": 3.0,
+      "text": "watching this video if you've enjoyed it"
+    },
+    {
+      "start": 2369.64,
+      "duration": 4.939,
+      "text": "please like And subscribe to the channel"
+    },
+    {
+      "start": 2371.26,
+      "duration": 3.319,
+      "text": "and we'll see you in the next video"
+    }
+  ]
+}
