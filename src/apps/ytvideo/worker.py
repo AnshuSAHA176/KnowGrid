@@ -163,7 +163,7 @@ if __name__ == "__main__":
             metadata=metadata,
             transcript=transcript,
         )
-        chunking(sagments=transcript['segments'])
+        chunks = chunking(sagments=transcript['segments'])
 
 
         

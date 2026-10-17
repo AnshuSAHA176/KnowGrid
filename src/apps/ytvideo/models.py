@@ -4,10 +4,21 @@ from django.conf import settings
 
 
 class YtVideo(models.Model):
+    class ProcessingStatus(models.TextChoices):
+        PENDING = "pending", "Pending"
+        PROCESSING = "processing", "Processing"
+        READY = "ready", "Ready"
+    FAILED = "failed", "Failed"
     youtube_id = models.CharField(primary_key=True, max_length=100)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="uploads"
     )
+    status = models.CharField(
+    max_length=20,
+    choices=ProcessingStatus.choices,
+    default=ProcessingStatus.PENDING,
+    db_index=True,
+)
     metadata = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
