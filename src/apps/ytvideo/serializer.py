@@ -44,9 +44,8 @@ class VideoCreateSerializer(serializers.ModelSerializer):
 
 
 class VideoTitleSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(source = 'user.email')
+    email = serializers.CharField(source="user.email")
+
     class Meta:
         model = YtVideo
-        fields =[
-            ''
-        ]
+        fields = ["email", "youtube_id", "status"]
