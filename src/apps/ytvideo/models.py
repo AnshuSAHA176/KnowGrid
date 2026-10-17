@@ -8,7 +8,7 @@ class YtVideo(models.Model):
         PENDING = "pending", "Pending"
         PROCESSING = "processing", "Processing"
         READY = "ready", "Ready"
-    FAILED = "failed", "Failed"
+        FAILED = "failed", "Failed"
     youtube_id = models.CharField(primary_key=True, max_length=100)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="uploads"
@@ -19,7 +19,7 @@ class YtVideo(models.Model):
     default=ProcessingStatus.PENDING,
     db_index=True,
 )
-    metadata = models.JSONField()
+    metadata = models.JSONField(default={})
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

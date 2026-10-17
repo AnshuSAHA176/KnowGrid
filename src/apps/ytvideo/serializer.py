@@ -10,13 +10,13 @@ class VideoCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = YtVideo
-        fields = ["youtube_id", "status", "created_at"]
+        fields = ["url","youtube_id", "status", "created_at"]
         extra_kwargs = {
-            {
+            
                 "youtube_id": {"read_only": True},
                 "status": {"read_only": True},
                 "created_at": {"read_only": True},
-            }
+            
         }
 
     def validate(self, attrs):

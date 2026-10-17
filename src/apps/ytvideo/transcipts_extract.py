@@ -134,19 +134,26 @@ class YouTubeProcessor:
         return output_path
 
     def process(self, url: str) -> dict:
+        print("1. Extracting video ID", flush=True)
         video_id = self.extract_video_id(url)
+
+        print("2. Fetching metadata", flush=True)
         metadata = self.get_video_metadata(url)
+        print("2. Metadata fetched", flush=True)
 
-        if metadata.get("video_id") != video_id:
-            raise ValueError("Extracted video ID does not match metadata")
-
+        print("3. Fetching transcript", flush=True)
         transcript = self.get_transcript(video_id)
+        print("3. Transcript fetched", flush=True)
+
+        print("4. Normalizing transcript", flush=True)
         transcript["segments"] = self.normalize_segments(
             transcript["segments"],
             transcript["language"],
         )
 
-        chunks = chunking(segments=transcript["segments"])
+        print("5. Generating chunks", flush=True)
+        chunks = chunking(sagments=transcript["segments"])
+        print(f"5. Generated {len(chunks)} chunks", flush=True)
 
         self.save_video_data(metadata, transcript)
 
@@ -155,7 +162,6 @@ class YouTubeProcessor:
             "transcript": transcript,
             "chunks": chunks,
         }
-
 
 if __name__ == "__main__":
     processor = YouTubeProcessor()

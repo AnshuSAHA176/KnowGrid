@@ -7,7 +7,9 @@ CLOUDFLARE_ACCOUNT_ID = os.environ["CLOUDFLARE_ACCOUNT_ID"]
 CLOUDFLARE_API_TOKEN = os.environ["CLOUDFLARE_API_TOKEN"]
 
 
-def generate_embedding(text: str):
+def generate_embeddings(texts: list[str]) -> list[list[float]]:
+    if not texts:
+        return []
 
     url = (
         f"https://api.cloudflare.com/client/v4/accounts/"
@@ -20,12 +22,9 @@ def generate_embedding(text: str):
             "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
             "Content-Type": "application/json",
         },
-        json={
-            "text": [text],
-        },
-        timeout=60,
+        json={"text": texts},
+        timeout=(10, 60),
     )
-
     response.raise_for_status()
 
     data = response.json()
@@ -33,4 +32,9 @@ def generate_embedding(text: str):
     if not data.get("success"):
         raise RuntimeError(data)
 
-    return data["result"]["data"][0]
+    embeddings = data["result"]["data"]
+
+    if len(embeddings) != len(texts):
+        raise RuntimeError("Embedding count does not match input count")
+
+    return embeddings

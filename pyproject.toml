@@ -18,6 +18,7 @@ dependencies = [
     "numpy>=2.5.4",
     "pgvector>=0.5.1",
     "psycopg[binary]>=3.3.6",
+    "redis==5.3.1",
     "youtube-transcript-api>=1.2.4",
     "yt-dlp>=2026.8.19",
 ]

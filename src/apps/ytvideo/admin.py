@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import YtVideo,YtVideoChunks
 
-# Register your models here.
+admin.site.register(YtVideoChunks)
+admin.site.register(YtVideo)

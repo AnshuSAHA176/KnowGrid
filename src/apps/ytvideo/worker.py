@@ -3,7 +3,7 @@ from django.db import transaction
 
 from .models import YtVideo, YtVideoChunks
 from .transcipts_extract import YouTubeProcessor
-from .RAG.generate_embedding import generate_embedding
+from .RAG.generate_embedding import generate_embeddings
 
 
 @shared_task(
@@ -16,15 +16,17 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
         video = YtVideo.objects.get(youtube_id=video_id)
         video.status = YtVideo.ProcessingStatus.PROCESSING
         video.save(update_fields=["status", "updated_at"])
-
+        print(video.youtube_id)
         processor = YouTubeProcessor()
         result = processor.process(url)
-
+        print(result['metadata'])
         chunks = result["chunks"]
+        print(len(chunks))
+        chunk_texts = [chunk["text"] for chunk in chunks]
+        embeddings = generate_embeddings(chunk_texts)
 
         with transaction.atomic():
-            for chunk in chunks:
-                embedding = generate_embedding(text=chunk["text"])
+            for chunk, embedding in zip(chunks, embeddings):
                 YtVideoChunks.objects.create(
                     video=video,
                     text=chunk["text"],
@@ -32,10 +34,10 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
                     start_time=chunk["start"],
                     end_time=chunk["end"],
                 )
+
             video.metadata = result["metadata"]
             video.status = YtVideo.ProcessingStatus.READY
             video.save(update_fields=["status", "updated_at", "metadata"])
-
         return {
             "video_id": video_id,
             "chunks_generated": len(chunks),

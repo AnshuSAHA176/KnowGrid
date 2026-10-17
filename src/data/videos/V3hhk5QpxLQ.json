@@ -1,0 +1,2067 @@
+{
+  "metadata": {
+    "video_id": "V3hhk5QpxLQ",
+    "title": "Django - Marking Session as 'modified' + django-silk inspection",
+    "channel": "BugBytes",
+    "description": "▶ Django & HTMX FULL COURSE: https://www.udemy.com/course/django-htmx-hypermedia-web-apps/?couponCode=BUGBYTES-APRIL\n\n🙏 Join our channel to get access to perks:\nhttps://www.youtube.com/channel/UCTwxaBjziKfy6y_uWu30orA/join\n\n☕️ 𝗕𝘂𝘆 𝗺𝗲 𝗮 𝗰𝗼𝗳𝗳𝗲𝗲:\nTo support the channel and encourage new videos, please consider buying a coffee here:\nhttps://ko-fi.com/bugbytes\n\nIn this video, we'll look at the 'modified' property of session objects, which can be used to tel Django that complex data in sessions (such as lists, nested dictionaries, etc) have been modified. We'll look at using django-silk to inspect the SQL sent to the database on certain session operations.\n\n𝗦𝗼𝗰𝗶𝗮𝗹 𝗠𝗲𝗱𝗶𝗮:\n▶ Udemy: https://www.udemy.com/user/bugbytes/\n📖 Blog: https://bugbytes.io/posts/\n👾 Github: https://github.com/bugbytes-io/\n\n📚 𝗙𝘂𝗿𝘁𝗵𝗲𝗿 𝗿𝗲𝗮𝗱𝗶𝗻𝗴 𝗮𝗻𝗱 𝗶𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻:\nDjango Sessions: https://docs.djangoproject.com/en/6.0/topics/http/sessions/\n\n#django #pythonanddjangofullstackwebdeveloper #python",
+    "duration_seconds": 616,
+    "thumbnail": "https://i.ytimg.com/vi_webp/V3hhk5QpxLQ/maxresdefault.webp",
+    "webpage_url": "https://www.youtube.com/watch?v=V3hhk5QpxLQ"
+  },
+  "transcript": {
+    "language": "en",
+    "segments": [
+      {
+        "start": 0.0,
+        "duration": 3.4,
+        "end": 3.4,
+        "text": "In this video, we're going to look a",
+        "language": "en"
+      },
+      {
+        "start": 1.28,
+        "duration": 4.28,
+        "end": 5.5600000000000005,
+        "text": "little bit more at when Django saves",
+        "language": "en"
+      },
+      {
+        "start": 3.4,
+        "duration": 3.52,
+        "end": 6.92,
+        "text": "session information to the database, and",
+        "language": "en"
+      },
+      {
+        "start": 5.56,
+        "duration": 3.68,
+        "end": 9.24,
+        "text": "this is going to be the last video in",
+        "language": "en"
+      },
+      {
+        "start": 6.92,
+        "duration": 3.72,
+        "end": 10.64,
+        "text": "this small set of videos on Django",
+        "language": "en"
+      },
+      {
+        "start": 9.24,
+        "duration": 3.0,
+        "end": 12.24,
+        "text": "sessions. And we're going to look at a",
+        "language": "en"
+      },
+      {
+        "start": 10.64,
+        "duration": 3.72,
+        "end": 14.360000000000001,
+        "text": "pro tip in this video, and that's the",
+        "language": "en"
+      },
+      {
+        "start": 12.24,
+        "duration": 4.4,
+        "end": 16.64,
+        "text": "modified flag that you can add to",
+        "language": "en"
+      },
+      {
+        "start": 14.36,
+        "duration": 4.0,
+        "end": 18.36,
+        "text": "Django's session object. And you can use",
+        "language": "en"
+      },
+      {
+        "start": 16.64,
+        "duration": 3.96,
+        "end": 20.6,
+        "text": "this when you have complex session",
+        "language": "en"
+      },
+      {
+        "start": 18.36,
+        "duration": 4.0,
+        "end": 22.36,
+        "text": "state, such as lists and dictionaries,",
+        "language": "en"
+      },
+      {
+        "start": 20.6,
+        "duration": 3.96,
+        "end": 24.560000000000002,
+        "text": "and you want to mark that some nested",
+        "language": "en"
+      },
+      {
+        "start": 22.36,
+        "duration": 4.24,
+        "end": 26.6,
+        "text": "data has changed, and then flush that",
+        "language": "en"
+      },
+      {
+        "start": 24.56,
+        "duration": 4.0,
+        "end": 28.56,
+        "text": "change to the database. So, we're going",
+        "language": "en"
+      },
+      {
+        "start": 26.6,
+        "duration": 3.16,
+        "end": 29.76,
+        "text": "to see examples in this video. Before we",
+        "language": "en"
+      },
+      {
+        "start": 28.56,
+        "duration": 3.08,
+        "end": 31.64,
+        "text": "get started, if you're finding this",
+        "language": "en"
+      },
+      {
+        "start": 29.76,
+        "duration": 3.28,
+        "end": 33.04,
+        "text": "content useful, check out our coffee",
+        "language": "en"
+      },
+      {
+        "start": 31.64,
+        "duration": 3.32,
+        "end": 34.96,
+        "text": "page. We've got a link just below the",
+        "language": "en"
+      },
+      {
+        "start": 33.04,
+        "duration": 3.88,
+        "end": 36.92,
+        "text": "video. Thank you very much to everybody",
+        "language": "en"
+      },
+      {
+        "start": 34.96,
+        "duration": 3.96,
+        "end": 38.92,
+        "text": "who's contributed to that. It's greatly",
+        "language": "en"
+      },
+      {
+        "start": 36.92,
+        "duration": 4.12,
+        "end": 41.04,
+        "text": "appreciated. And let's get started",
+        "language": "en"
+      },
+      {
+        "start": 38.92,
+        "duration": 3.84,
+        "end": 42.760000000000005,
+        "text": "looking at sessions. So, we have this",
+        "language": "en"
+      },
+      {
+        "start": 41.04,
+        "duration": 3.4,
+        "end": 44.44,
+        "text": "secret page that we saw in the previous",
+        "language": "en"
+      },
+      {
+        "start": 42.76,
+        "duration": 3.4,
+        "end": 46.16,
+        "text": "video, and we're going to work on this",
+        "language": "en"
+      },
+      {
+        "start": 44.44,
+        "duration": 3.88,
+        "end": 48.32,
+        "text": "page throughout the video, but for now,",
+        "language": "en"
+      },
+      {
+        "start": 46.16,
+        "duration": 4.24,
+        "end": 50.4,
+        "text": "let's go to the Django documentation on",
+        "language": "en"
+      },
+      {
+        "start": 48.32,
+        "duration": 3.96,
+        "end": 52.28,
+        "text": "when sessions are saved. Now, by",
+        "language": "en"
+      },
+      {
+        "start": 50.4,
+        "duration": 4.44,
+        "end": 54.839999999999996,
+        "text": "default, Django only saves to the",
+        "language": "en"
+      },
+      {
+        "start": 52.28,
+        "duration": 5.04,
+        "end": 57.32,
+        "text": "session database when the session object",
+        "language": "en"
+      },
+      {
+        "start": 54.84,
+        "duration": 4.48,
+        "end": 59.32000000000001,
+        "text": "has been modified. That is, if any",
+        "language": "en"
+      },
+      {
+        "start": 57.32,
+        "duration": 4.04,
+        "end": 61.36,
+        "text": "dictionary values have been assigned or",
+        "language": "en"
+      },
+      {
+        "start": 59.32,
+        "duration": 4.16,
+        "end": 63.480000000000004,
+        "text": "deleted. So, for example, here you can",
+        "language": "en"
+      },
+      {
+        "start": 61.36,
+        "duration": 5.2,
+        "end": 66.56,
+        "text": "see the session being modified when we",
+        "language": "en"
+      },
+      {
+        "start": 63.48,
+        "duration": 4.88,
+        "end": 68.36,
+        "text": "set a key of foo to the value of bar.",
+        "language": "en"
+      },
+      {
+        "start": 66.56,
+        "duration": 3.6,
+        "end": 70.16,
+        "text": "So, request.session, if you remember, is",
+        "language": "en"
+      },
+      {
+        "start": 68.36,
+        "duration": 4.32,
+        "end": 72.68,
+        "text": "a dictionary-like object called a",
+        "language": "en"
+      },
+      {
+        "start": 70.16,
+        "duration": 4.16,
+        "end": 74.32,
+        "text": "session store, and here we can delete a",
+        "language": "en"
+      },
+      {
+        "start": 72.68,
+        "duration": 4.0,
+        "end": 76.68,
+        "text": "key from the dictionary. Again, that's",
+        "language": "en"
+      },
+      {
+        "start": 74.32,
+        "duration": 4.6,
+        "end": 78.91999999999999,
+        "text": "marking the session as being modified,",
+        "language": "en"
+      },
+      {
+        "start": 76.68,
+        "duration": 4.56,
+        "end": 81.24000000000001,
+        "text": "and Django will then flush that new",
+        "language": "en"
+      },
+      {
+        "start": 78.92,
+        "duration": 4.6,
+        "end": 83.52,
+        "text": "change to the database and remove, in",
+        "language": "en"
+      },
+      {
+        "start": 81.24,
+        "duration": 4.88,
+        "end": 86.11999999999999,
+        "text": "this case, the foo key. So, whenever you",
+        "language": "en"
+      },
+      {
+        "start": 83.52,
+        "duration": 4.32,
+        "end": 87.84,
+        "text": "assign to a key, such as this here, even",
+        "language": "en"
+      },
+      {
+        "start": 86.12,
+        "duration": 3.4,
+        "end": 89.52000000000001,
+        "text": "if you're assigning an empty dictionary",
+        "language": "en"
+      },
+      {
+        "start": 87.84,
+        "duration": 3.96,
+        "end": 91.8,
+        "text": "in this case, you're noting that the",
+        "language": "en"
+      },
+      {
+        "start": 89.52,
+        "duration": 4.52,
+        "end": 94.03999999999999,
+        "text": "session has been modified, and Django",
+        "language": "en"
+      },
+      {
+        "start": 91.8,
+        "duration": 4.44,
+        "end": 96.24,
+        "text": "will flush that change to the database.",
+        "language": "en"
+      },
+      {
+        "start": 94.04,
+        "duration": 4.4,
+        "end": 98.44000000000001,
+        "text": "But here is the small gotcha. If you",
+        "language": "en"
+      },
+      {
+        "start": 96.24,
+        "duration": 4.0,
+        "end": 100.24,
+        "text": "have nested data, for example, in the",
+        "language": "en"
+      },
+      {
+        "start": 98.44,
+        "duration": 3.6,
+        "end": 102.03999999999999,
+        "text": "foo dictionary that we set up above",
+        "language": "en"
+      },
+      {
+        "start": 100.24,
+        "duration": 4.16,
+        "end": 104.39999999999999,
+        "text": "here, if you then add a key to that",
+        "language": "en"
+      },
+      {
+        "start": 102.04,
+        "duration": 4.36,
+        "end": 106.4,
+        "text": "nested dictionary called bar, and then",
+        "language": "en"
+      },
+      {
+        "start": 104.4,
+        "duration": 4.52,
+        "end": 108.92,
+        "text": "set it to a value, in this case, the",
+        "language": "en"
+      },
+      {
+        "start": 106.4,
+        "duration": 4.48,
+        "end": 110.88000000000001,
+        "text": "session is not modified. So, if your",
+        "language": "en"
+      },
+      {
+        "start": 108.92,
+        "duration": 3.96,
+        "end": 112.88,
+        "text": "session state contains nested",
+        "language": "en"
+      },
+      {
+        "start": 110.88,
+        "duration": 3.88,
+        "end": 114.75999999999999,
+        "text": "dictionaries like this, you need to tell",
+        "language": "en"
+      },
+      {
+        "start": 112.88,
+        "duration": 3.96,
+        "end": 116.83999999999999,
+        "text": "Django when you're changing the nested",
+        "language": "en"
+      },
+      {
+        "start": 114.76,
+        "duration": 4.84,
+        "end": 119.60000000000001,
+        "text": "data, and you can do it by setting this",
+        "language": "en"
+      },
+      {
+        "start": 116.84,
+        "duration": 4.92,
+        "end": 121.76,
+        "text": "modified flag to true. So, you can see",
+        "language": "en"
+      },
+      {
+        "start": 119.6,
+        "duration": 3.96,
+        "end": 123.55999999999999,
+        "text": "request.session.modified,",
+        "language": "en"
+      },
+      {
+        "start": 121.76,
+        "duration": 3.8,
+        "end": 125.56,
+        "text": "we're setting it to true here, and that",
+        "language": "en"
+      },
+      {
+        "start": 123.56,
+        "duration": 4.6,
+        "end": 128.16,
+        "text": "will then tell Django we need to save",
+        "language": "en"
+      },
+      {
+        "start": 125.56,
+        "duration": 3.96,
+        "end": 129.52,
+        "text": "the session data to the session back-end",
+        "language": "en"
+      },
+      {
+        "start": 128.16,
+        "duration": 2.879,
+        "end": 131.039,
+        "text": "in the database. Now, we're going to",
+        "language": "en"
+      },
+      {
+        "start": 129.52,
+        "duration": 4.04,
+        "end": 133.56,
+        "text": "look at a small demo that's going to use",
+        "language": "en"
+      },
+      {
+        "start": 131.039,
+        "duration": 4.801,
+        "end": 135.83999999999997,
+        "text": "Django Silk to inspect the requests and",
+        "language": "en"
+      },
+      {
+        "start": 133.56,
+        "duration": 4.4,
+        "end": 137.96,
+        "text": "the SQL. But before we move on to that,",
+        "language": "en"
+      },
+      {
+        "start": 135.84,
+        "duration": 4.2,
+        "end": 140.04,
+        "text": "notice this setting. It's called session",
+        "language": "en"
+      },
+      {
+        "start": 137.96,
+        "duration": 4.76,
+        "end": 142.72,
+        "text": "save every request, and if you want to",
+        "language": "en"
+      },
+      {
+        "start": 140.04,
+        "duration": 4.4,
+        "end": 144.44,
+        "text": "save the session data on every request,",
+        "language": "en"
+      },
+      {
+        "start": 142.72,
+        "duration": 3.56,
+        "end": 146.28,
+        "text": "you can set this to true. By default,",
+        "language": "en"
+      },
+      {
+        "start": 144.44,
+        "duration": 3.92,
+        "end": 148.35999999999999,
+        "text": "this is set to false. That would give",
+        "language": "en"
+      },
+      {
+        "start": 146.28,
+        "duration": 4.4,
+        "end": 150.68,
+        "text": "you a safe way to update the session,",
+        "language": "en"
+      },
+      {
+        "start": 148.36,
+        "duration": 5.4,
+        "end": 153.76000000000002,
+        "text": "but it comes with a downside of sending",
+        "language": "en"
+      },
+      {
+        "start": 150.68,
+        "duration": 5.52,
+        "end": 156.20000000000002,
+        "text": "some session updates SQL to the database",
+        "language": "en"
+      },
+      {
+        "start": 153.76,
+        "duration": 4.04,
+        "end": 157.79999999999998,
+        "text": "on every single request, which is maybe",
+        "language": "en"
+      },
+      {
+        "start": 156.2,
+        "duration": 3.44,
+        "end": 159.64,
+        "text": "not something you really need to do",
+        "language": "en"
+      },
+      {
+        "start": 157.8,
+        "duration": 3.44,
+        "end": 161.24,
+        "text": "here. Now, let's look at a very small",
+        "language": "en"
+      },
+      {
+        "start": 159.64,
+        "duration": 3.68,
+        "end": 163.32,
+        "text": "example with Django, and we're going to",
+        "language": "en"
+      },
+      {
+        "start": 161.24,
+        "duration": 4.0,
+        "end": 165.24,
+        "text": "go to that secret view that we have in",
+        "language": "en"
+      },
+      {
+        "start": 163.32,
+        "duration": 4.0,
+        "end": 167.32,
+        "text": "the application that is protected by",
+        "language": "en"
+      },
+      {
+        "start": 165.24,
+        "duration": 4.12,
+        "end": 169.36,
+        "text": "login required. And let's just start by",
+        "language": "en"
+      },
+      {
+        "start": 167.32,
+        "duration": 4.64,
+        "end": 171.95999999999998,
+        "text": "setting a session variable here. So,",
+        "language": "en"
+      },
+      {
+        "start": 169.36,
+        "duration": 4.64,
+        "end": 174.0,
+        "text": "request.session, and let's say the user",
+        "language": "en"
+      },
+      {
+        "start": 171.96,
+        "duration": 3.8,
+        "end": 175.76000000000002,
+        "text": "has set their theme preference on the",
+        "language": "en"
+      },
+      {
+        "start": 174.0,
+        "duration": 3.76,
+        "end": 177.76,
+        "text": "front-end, and we're going to set that",
+        "language": "en"
+      },
+      {
+        "start": 175.76,
+        "duration": 4.0,
+        "end": 179.76,
+        "text": "to dark. So, essentially, we're changing",
+        "language": "en"
+      },
+      {
+        "start": 177.76,
+        "duration": 4.0,
+        "end": 181.76,
+        "text": "it to dark mode here. This is a canned",
+        "language": "en"
+      },
+      {
+        "start": 179.76,
+        "duration": 3.64,
+        "end": 183.39999999999998,
+        "text": "example, I'm not going to deny it, but",
+        "language": "en"
+      },
+      {
+        "start": 181.76,
+        "duration": 4.16,
+        "end": 185.92,
+        "text": "let's see what happens when we go to",
+        "language": "en"
+      },
+      {
+        "start": 183.4,
+        "duration": 4.84,
+        "end": 188.24,
+        "text": "this secret page. So, let's refresh this",
+        "language": "en"
+      },
+      {
+        "start": 185.92,
+        "duration": 4.16,
+        "end": 190.07999999999998,
+        "text": "page, and what what I have loaded here",
+        "language": "en"
+      },
+      {
+        "start": 188.24,
+        "duration": 4.08,
+        "end": 192.32000000000002,
+        "text": "is Django Silk, which we can use to",
+        "language": "en"
+      },
+      {
+        "start": 190.08,
+        "duration": 4.04,
+        "end": 194.12,
+        "text": "inspect the requests that have been sent",
+        "language": "en"
+      },
+      {
+        "start": 192.32,
+        "duration": 3.44,
+        "end": 195.76,
+        "text": "to the application. So, if we refresh",
+        "language": "en"
+      },
+      {
+        "start": 194.12,
+        "duration": 3.56,
+        "end": 197.68,
+        "text": "this summary page, we've now got one",
+        "language": "en"
+      },
+      {
+        "start": 195.76,
+        "duration": 4.04,
+        "end": 199.79999999999998,
+        "text": "request that was sent, and we can then",
+        "language": "en"
+      },
+      {
+        "start": 197.68,
+        "duration": 4.28,
+        "end": 201.96,
+        "text": "go to that and inspect some of the",
+        "language": "en"
+      },
+      {
+        "start": 199.8,
+        "duration": 4.44,
+        "end": 204.24,
+        "text": "details and profiling that's involved in",
+        "language": "en"
+      },
+      {
+        "start": 201.96,
+        "duration": 4.72,
+        "end": 206.68,
+        "text": "this request. And one of the options",
+        "language": "en"
+      },
+      {
+        "start": 204.24,
+        "duration": 4.84,
+        "end": 209.08,
+        "text": "here is to look at the SQL. Now, notice",
+        "language": "en"
+      },
+      {
+        "start": 206.68,
+        "duration": 4.8,
+        "end": 211.48000000000002,
+        "text": "this update statement here. This is",
+        "language": "en"
+      },
+      {
+        "start": 209.08,
+        "duration": 4.32,
+        "end": 213.4,
+        "text": "updating the Django session database",
+        "language": "en"
+      },
+      {
+        "start": 211.48,
+        "duration": 3.8,
+        "end": 215.28,
+        "text": "table that we saw in the initial session",
+        "language": "en"
+      },
+      {
+        "start": 213.4,
+        "duration": 4.48,
+        "end": 217.88,
+        "text": "video. That's because we are using the",
+        "language": "en"
+      },
+      {
+        "start": 215.28,
+        "duration": 4.56,
+        "end": 219.84,
+        "text": "database as our session engine. So, when",
+        "language": "en"
+      },
+      {
+        "start": 217.88,
+        "duration": 4.12,
+        "end": 222.0,
+        "text": "we modify data like this on a per",
+        "language": "en"
+      },
+      {
+        "start": 219.84,
+        "duration": 4.08,
+        "end": 223.92000000000002,
+        "text": "visitor basis, that's ultimately going",
+        "language": "en"
+      },
+      {
+        "start": 222.0,
+        "duration": 3.6,
+        "end": 225.6,
+        "text": "to be stored in that table. Now, if we",
+        "language": "en"
+      },
+      {
+        "start": 223.92,
+        "duration": 3.28,
+        "end": 227.2,
+        "text": "go back to the application and again",
+        "language": "en"
+      },
+      {
+        "start": 225.6,
+        "duration": 4.24,
+        "end": 229.84,
+        "text": "refresh this page, I'm going to go back",
+        "language": "en"
+      },
+      {
+        "start": 227.2,
+        "duration": 4.56,
+        "end": 231.76,
+        "text": "to the Django Silk summary page, and",
+        "language": "en"
+      },
+      {
+        "start": 229.84,
+        "duration": 3.88,
+        "end": 233.72,
+        "text": "we're going to see again that an update",
+        "language": "en"
+      },
+      {
+        "start": 231.76,
+        "duration": 3.76,
+        "end": 235.51999999999998,
+        "text": "is sent to the session table. And the",
+        "language": "en"
+      },
+      {
+        "start": 233.72,
+        "duration": 4.16,
+        "end": 237.88,
+        "text": "reason for that is because it appears",
+        "language": "en"
+      },
+      {
+        "start": 235.52,
+        "duration": 4.16,
+        "end": 239.68,
+        "text": "that we are amending the theme key of",
+        "language": "en"
+      },
+      {
+        "start": 237.88,
+        "duration": 4.28,
+        "end": 242.16,
+        "text": "request.session, even though we're",
+        "language": "en"
+      },
+      {
+        "start": 239.68,
+        "duration": 4.48,
+        "end": 244.16,
+        "text": "setting it to the same value. So, every",
+        "language": "en"
+      },
+      {
+        "start": 242.16,
+        "duration": 4.4,
+        "end": 246.56,
+        "text": "time we change a key in the in the",
+        "language": "en"
+      },
+      {
+        "start": 244.16,
+        "duration": 4.68,
+        "end": 248.84,
+        "text": "session object, it's going to send that",
+        "language": "en"
+      },
+      {
+        "start": 246.56,
+        "duration": 4.08,
+        "end": 250.64000000000001,
+        "text": "update to the database. And for code",
+        "language": "en"
+      },
+      {
+        "start": 248.84,
+        "duration": 3.88,
+        "end": 252.72,
+        "text": "like this, it's going to be a wasted",
+        "language": "en"
+      },
+      {
+        "start": 250.64,
+        "duration": 4.4,
+        "end": 255.04,
+        "text": "query to the database. What we can do",
+        "language": "en"
+      },
+      {
+        "start": 252.72,
+        "duration": 4.519,
+        "end": 257.239,
+        "text": "instead is we can check if theme is",
+        "language": "en"
+      },
+      {
+        "start": 255.04,
+        "duration": 4.039,
+        "end": 259.079,
+        "text": "already in the request.session",
+        "language": "en"
+      },
+      {
+        "start": 257.239,
+        "duration": 3.481,
+        "end": 260.71999999999997,
+        "text": "dictionary. Now, the way to do that is",
+        "language": "en"
+      },
+      {
+        "start": 259.079,
+        "duration": 4.881,
+        "end": 263.96000000000004,
+        "text": "to use an if statement. So, we can check",
+        "language": "en"
+      },
+      {
+        "start": 260.72,
+        "duration": 5.04,
+        "end": 265.76000000000005,
+        "text": "if theme is in request.session,",
+        "language": "en"
+      },
+      {
+        "start": 263.96,
+        "duration": 3.2,
+        "end": 267.15999999999997,
+        "text": "and we can tab this over, but we don't",
+        "language": "en"
+      },
+      {
+        "start": 265.76,
+        "duration": 4.32,
+        "end": 270.08,
+        "text": "need to change this because we're going",
+        "language": "en"
+      },
+      {
+        "start": 267.16,
+        "duration": 5.04,
+        "end": 272.20000000000005,
+        "text": "to set the theme option if it's not in",
+        "language": "en"
+      },
+      {
+        "start": 270.08,
+        "duration": 3.64,
+        "end": 273.71999999999997,
+        "text": "the request.session. So, instead of if",
+        "language": "en"
+      },
+      {
+        "start": 272.2,
+        "duration": 3.96,
+        "end": 276.15999999999997,
+        "text": "it's in request.session, we're going to",
+        "language": "en"
+      },
+      {
+        "start": 273.72,
+        "duration": 4.72,
+        "end": 278.44000000000005,
+        "text": "check if it's not yet been set. So, if",
+        "language": "en"
+      },
+      {
+        "start": 276.16,
+        "duration": 4.64,
+        "end": 280.8,
+        "text": "the theme is not in request.session, we",
+        "language": "en"
+      },
+      {
+        "start": 278.44,
+        "duration": 4.04,
+        "end": 282.48,
+        "text": "will set it for the first time. And now,",
+        "language": "en"
+      },
+      {
+        "start": 280.8,
+        "duration": 4.08,
+        "end": 284.88,
+        "text": "if we go back to this page and refresh",
+        "language": "en"
+      },
+      {
+        "start": 282.48,
+        "duration": 4.64,
+        "end": 287.12,
+        "text": "the page, we can go back to Django Silk,",
+        "language": "en"
+      },
+      {
+        "start": 284.88,
+        "duration": 4.4,
+        "end": 289.28,
+        "text": "and if we look at the summary page here,",
+        "language": "en"
+      },
+      {
+        "start": 287.12,
+        "duration": 4.72,
+        "end": 291.84000000000003,
+        "text": "this has only two queries, and we are no",
+        "language": "en"
+      },
+      {
+        "start": 289.28,
+        "duration": 3.56,
+        "end": 292.84,
+        "text": "longer issuing the update statement. And",
+        "language": "en"
+      },
+      {
+        "start": 291.84,
+        "duration": 2.84,
+        "end": 294.67999999999995,
+        "text": "by the way, if you want to know more",
+        "language": "en"
+      },
+      {
+        "start": 292.84,
+        "duration": 3.76,
+        "end": 296.59999999999997,
+        "text": "about Django Silk, I'll leave a link to",
+        "language": "en"
+      },
+      {
+        "start": 294.68,
+        "duration": 4.16,
+        "end": 298.84000000000003,
+        "text": "the video we did on this topic in the",
+        "language": "en"
+      },
+      {
+        "start": 296.6,
+        "duration": 3.76,
+        "end": 300.36,
+        "text": "comments. So, this is more performant if",
+        "language": "en"
+      },
+      {
+        "start": 298.84,
+        "duration": 3.72,
+        "end": 302.56,
+        "text": "you're just hardcoding something like",
+        "language": "en"
+      },
+      {
+        "start": 300.36,
+        "duration": 4.48,
+        "end": 304.84000000000003,
+        "text": "this, because you no longer need to send",
+        "language": "en"
+      },
+      {
+        "start": 302.56,
+        "duration": 4.72,
+        "end": 307.28000000000003,
+        "text": "that update statement to the database on",
+        "language": "en"
+      },
+      {
+        "start": 304.84,
+        "duration": 4.72,
+        "end": 309.56,
+        "text": "every single request to this view. Now,",
+        "language": "en"
+      },
+      {
+        "start": 307.28,
+        "duration": 4.32,
+        "end": 311.59999999999997,
+        "text": "with objects like lists and nested",
+        "language": "en"
+      },
+      {
+        "start": 309.56,
+        "duration": 4.48,
+        "end": 314.04,
+        "text": "dictionaries of data in the session,",
+        "language": "en"
+      },
+      {
+        "start": 311.6,
+        "duration": 4.32,
+        "end": 315.92,
+        "text": "this update that we saw before is not",
+        "language": "en"
+      },
+      {
+        "start": 314.04,
+        "duration": 3.16,
+        "end": 317.20000000000005,
+        "text": "automatic. So, I'm going to change this",
+        "language": "en"
+      },
+      {
+        "start": 315.92,
+        "duration": 3.8,
+        "end": 319.72,
+        "text": "up slightly. We're going to look at a",
+        "language": "en"
+      },
+      {
+        "start": 317.2,
+        "duration": 5.04,
+        "end": 322.24,
+        "text": "key called items, and if that's not in",
+        "language": "en"
+      },
+      {
+        "start": 319.72,
+        "duration": 5.56,
+        "end": 325.28000000000003,
+        "text": "request.session, we're going to set that",
+        "language": "en"
+      },
+      {
+        "start": 322.24,
+        "duration": 5.2,
+        "end": 327.44,
+        "text": "key in request.session to an empty",
+        "language": "en"
+      },
+      {
+        "start": 325.28,
+        "duration": 4.08,
+        "end": 329.35999999999996,
+        "text": "Python list. Now, if we save that and go",
+        "language": "en"
+      },
+      {
+        "start": 327.44,
+        "duration": 3.88,
+        "end": 331.32,
+        "text": "back to the secret page here, let's",
+        "language": "en"
+      },
+      {
+        "start": 329.36,
+        "duration": 3.72,
+        "end": 333.08000000000004,
+        "text": "refresh the page, and then if we go back",
+        "language": "en"
+      },
+      {
+        "start": 331.32,
+        "duration": 4.28,
+        "end": 335.59999999999997,
+        "text": "to Django Silk, we can look at the most",
+        "language": "en"
+      },
+      {
+        "start": 333.08,
+        "duration": 4.6,
+        "end": 337.68,
+        "text": "recent request, and notice again we now",
+        "language": "en"
+      },
+      {
+        "start": 335.6,
+        "duration": 3.96,
+        "end": 339.56,
+        "text": "have an update to the Django session",
+        "language": "en"
+      },
+      {
+        "start": 337.68,
+        "duration": 4.2,
+        "end": 341.88,
+        "text": "table. But that's not going to happen if",
+        "language": "en"
+      },
+      {
+        "start": 339.56,
+        "duration": 4.24,
+        "end": 343.8,
+        "text": "we go back and refresh one more time. If",
+        "language": "en"
+      },
+      {
+        "start": 341.88,
+        "duration": 3.84,
+        "end": 345.71999999999997,
+        "text": "we go back to the requests page and",
+        "language": "en"
+      },
+      {
+        "start": 343.8,
+        "duration": 4.52,
+        "end": 348.32,
+        "text": "refresh here, we no longer get that",
+        "language": "en"
+      },
+      {
+        "start": 345.72,
+        "duration": 4.6,
+        "end": 350.32000000000005,
+        "text": "update because it's already written the",
+        "language": "en"
+      },
+      {
+        "start": 348.32,
+        "duration": 4.12,
+        "end": 352.44,
+        "text": "items to the session, and this if",
+        "language": "en"
+      },
+      {
+        "start": 350.32,
+        "duration": 4.36,
+        "end": 354.68,
+        "text": "statement prevents it from being written",
+        "language": "en"
+      },
+      {
+        "start": 352.44,
+        "duration": 4.76,
+        "end": 357.2,
+        "text": "again. So, the items key in the session",
+        "language": "en"
+      },
+      {
+        "start": 354.68,
+        "duration": 5.32,
+        "end": 360.0,
+        "text": "is now an empty list. What happens if we",
+        "language": "en"
+      },
+      {
+        "start": 357.2,
+        "duration": 4.72,
+        "end": 361.92,
+        "text": "try and append an item to that? So, I'm",
+        "language": "en"
+      },
+      {
+        "start": 360.0,
+        "duration": 4.36,
+        "end": 364.36,
+        "text": "going to look at request.session, and",
+        "language": "en"
+      },
+      {
+        "start": 361.92,
+        "duration": 4.92,
+        "end": 366.84000000000003,
+        "text": "let's extract the items key here, and",
+        "language": "en"
+      },
+      {
+        "start": 364.36,
+        "duration": 5.0,
+        "end": 369.36,
+        "text": "then because that is a list in Python,",
+        "language": "en"
+      },
+      {
+        "start": 366.84,
+        "duration": 4.88,
+        "end": 371.71999999999997,
+        "text": "we can call the dot append method. And",
+        "language": "en"
+      },
+      {
+        "start": 369.36,
+        "duration": 4.2,
+        "end": 373.56,
+        "text": "let's append an item here called item",
+        "language": "en"
+      },
+      {
+        "start": 371.72,
+        "duration": 3.72,
+        "end": 375.44000000000005,
+        "text": "one. Now, request.session is a",
+        "language": "en"
+      },
+      {
+        "start": 373.56,
+        "duration": 4.0,
+        "end": 377.56,
+        "text": "dictionary-like object. What I'm going",
+        "language": "en"
+      },
+      {
+        "start": 375.44,
+        "duration": 4.72,
+        "end": 380.16,
+        "text": "to do after we append that item is I'm",
+        "language": "en"
+      },
+      {
+        "start": 377.56,
+        "duration": 4.44,
+        "end": 382.0,
+        "text": "going to print out the dictionary.items",
+        "language": "en"
+      },
+      {
+        "start": 380.16,
+        "duration": 3.8,
+        "end": 383.96000000000004,
+        "text": "method. So, what that returns is the",
+        "language": "en"
+      },
+      {
+        "start": 382.0,
+        "duration": 3.6,
+        "end": 385.6,
+        "text": "keys and values in the dictionary. Let's",
+        "language": "en"
+      },
+      {
+        "start": 383.96,
+        "duration": 3.0,
+        "end": 386.96,
+        "text": "print that to the terminal. And now,",
+        "language": "en"
+      },
+      {
+        "start": 385.6,
+        "duration": 2.56,
+        "end": 388.16,
+        "text": "we're going to go back to the secret",
+        "language": "en"
+      },
+      {
+        "start": 386.96,
+        "duration": 3.48,
+        "end": 390.44,
+        "text": "page, and we're going to see what",
+        "language": "en"
+      },
+      {
+        "start": 388.16,
+        "duration": 3.72,
+        "end": 391.88000000000005,
+        "text": "happens. So, let's refresh this page,",
+        "language": "en"
+      },
+      {
+        "start": 390.44,
+        "duration": 2.8,
+        "end": 393.24,
+        "text": "and I know I'm refreshing this page",
+        "language": "en"
+      },
+      {
+        "start": 391.88,
+        "duration": 3.48,
+        "end": 395.36,
+        "text": "randomly. Nothing's happening on the",
+        "language": "en"
+      },
+      {
+        "start": 393.24,
+        "duration": 3.88,
+        "end": 397.12,
+        "text": "page itself, but if we go back to the",
+        "language": "en"
+      },
+      {
+        "start": 395.36,
+        "duration": 4.64,
+        "end": 400.0,
+        "text": "most recent request, which is this one",
+        "language": "en"
+      },
+      {
+        "start": 397.12,
+        "duration": 5.0,
+        "end": 402.12,
+        "text": "here, and look at the SQL, we don't get",
+        "language": "en"
+      },
+      {
+        "start": 400.0,
+        "duration": 3.96,
+        "end": 403.96,
+        "text": "any updates to the session table. We can",
+        "language": "en"
+      },
+      {
+        "start": 402.12,
+        "duration": 4.16,
+        "end": 406.28000000000003,
+        "text": "see a select to the session table, but",
+        "language": "en"
+      },
+      {
+        "start": 403.96,
+        "duration": 4.52,
+        "end": 408.47999999999996,
+        "text": "that happens on every request. But there",
+        "language": "en"
+      },
+      {
+        "start": 406.28,
+        "duration": 4.8,
+        "end": 411.08,
+        "text": "are no updates to the table, even though",
+        "language": "en"
+      },
+      {
+        "start": 408.48,
+        "duration": 5.4,
+        "end": 413.88,
+        "text": "we have appended an item to the items",
+        "language": "en"
+      },
+      {
+        "start": 411.08,
+        "duration": 4.28,
+        "end": 415.35999999999996,
+        "text": "key in request.session. Now, if we open",
+        "language": "en"
+      },
+      {
+        "start": 413.88,
+        "duration": 3.52,
+        "end": 417.4,
+        "text": "the terminal, we're going to see the",
+        "language": "en"
+      },
+      {
+        "start": 415.36,
+        "duration": 4.16,
+        "end": 419.52000000000004,
+        "text": "dictionary items that were printed on",
+        "language": "en"
+      },
+      {
+        "start": 417.4,
+        "duration": 4.56,
+        "end": 421.96,
+        "text": "line 35 here. So, let's have a look at",
+        "language": "en"
+      },
+      {
+        "start": 419.52,
+        "duration": 4.96,
+        "end": 424.47999999999996,
+        "text": "these, and notice here, if we look at",
+        "language": "en"
+      },
+      {
+        "start": 421.96,
+        "duration": 5.32,
+        "end": 427.28,
+        "text": "the items key in the session, it does",
+        "language": "en"
+      },
+      {
+        "start": 424.48,
+        "duration": 4.96,
+        "end": 429.44,
+        "text": "appear that the list contains an item",
+        "language": "en"
+      },
+      {
+        "start": 427.28,
+        "duration": 3.8,
+        "end": 431.08,
+        "text": "here called item one. So, that's kind of",
+        "language": "en"
+      },
+      {
+        "start": 429.44,
+        "duration": 4.16,
+        "end": 433.6,
+        "text": "weird because we're not updating the",
+        "language": "en"
+      },
+      {
+        "start": 431.08,
+        "duration": 4.4,
+        "end": 435.47999999999996,
+        "text": "database, but we have appended this item",
+        "language": "en"
+      },
+      {
+        "start": 433.6,
+        "duration": 3.32,
+        "end": 436.92,
+        "text": "to the session in memory. But we're",
+        "language": "en"
+      },
+      {
+        "start": 435.48,
+        "duration": 3.84,
+        "end": 439.32,
+        "text": "going to see the problem if we go back",
+        "language": "en"
+      },
+      {
+        "start": 436.92,
+        "duration": 4.24,
+        "end": 441.16,
+        "text": "to the secret page and refresh again.",
+        "language": "en"
+      },
+      {
+        "start": 439.32,
+        "duration": 3.96,
+        "end": 443.28,
+        "text": "So, when we refresh this page, again",
+        "language": "en"
+      },
+      {
+        "start": 441.16,
+        "duration": 3.28,
+        "end": 444.44,
+        "text": "this view is going to be called, and",
+        "language": "en"
+      },
+      {
+        "start": 443.28,
+        "duration": 3.84,
+        "end": 447.11999999999995,
+        "text": "what's going to happen is we're going to",
+        "language": "en"
+      },
+      {
+        "start": 444.44,
+        "duration": 5.84,
+        "end": 450.28,
+        "text": "try and append item one again to",
+        "language": "en"
+      },
+      {
+        "start": 447.12,
+        "duration": 4.88,
+        "end": 452.0,
+        "text": "request.session at the items key. And if",
+        "language": "en"
+      },
+      {
+        "start": 450.28,
+        "duration": 4.08,
+        "end": 454.35999999999996,
+        "text": "we go back to the terminal, we can see",
+        "language": "en"
+      },
+      {
+        "start": 452.0,
+        "duration": 3.8,
+        "end": 455.8,
+        "text": "again, this was the initial print",
+        "language": "en"
+      },
+      {
+        "start": 454.36,
+        "duration": 3.76,
+        "end": 458.12,
+        "text": "statement. In the second print",
+        "language": "en"
+      },
+      {
+        "start": 455.8,
+        "duration": 4.8,
+        "end": 460.6,
+        "text": "statement, again item one is the only",
+        "language": "en"
+      },
+      {
+        "start": 458.12,
+        "duration": 4.84,
+        "end": 462.96,
+        "text": "item in that key. Now, what we would",
+        "language": "en"
+      },
+      {
+        "start": 460.6,
+        "duration": 4.68,
+        "end": 465.28000000000003,
+        "text": "expect to see is item one added on the",
+        "language": "en"
+      },
+      {
+        "start": 462.96,
+        "duration": 4.48,
+        "end": 467.44,
+        "text": "initial request, and then on the second",
+        "language": "en"
+      },
+      {
+        "start": 465.28,
+        "duration": 4.76,
+        "end": 470.03999999999996,
+        "text": "request, we expect to see the list",
+        "language": "en"
+      },
+      {
+        "start": 467.44,
+        "duration": 4.56,
+        "end": 472.0,
+        "text": "containing two elements, both with the",
+        "language": "en"
+      },
+      {
+        "start": 470.04,
+        "duration": 4.16,
+        "end": 474.20000000000005,
+        "text": "string item one. But that's not what's",
+        "language": "en"
+      },
+      {
+        "start": 472.0,
+        "duration": 4.88,
+        "end": 476.88,
+        "text": "happening because when these items are",
+        "language": "en"
+      },
+      {
+        "start": 474.2,
+        "duration": 4.48,
+        "end": 478.68,
+        "text": "appended, Django is not saving that to",
+        "language": "en"
+      },
+      {
+        "start": 476.88,
+        "duration": 4.4,
+        "end": 481.28,
+        "text": "the database. And the reason it's not",
+        "language": "en"
+      },
+      {
+        "start": 478.68,
+        "duration": 4.8,
+        "end": 483.48,
+        "text": "saving is because Django does not detect",
+        "language": "en"
+      },
+      {
+        "start": 481.28,
+        "duration": 4.12,
+        "end": 485.4,
+        "text": "that appending to a list, for example,",
+        "language": "en"
+      },
+      {
+        "start": 483.48,
+        "duration": 4.24,
+        "end": 487.72,
+        "text": "is something that should trigger a flush",
+        "language": "en"
+      },
+      {
+        "start": 485.4,
+        "duration": 3.88,
+        "end": 489.28,
+        "text": "of the session data. But what we can do,",
+        "language": "en"
+      },
+      {
+        "start": 487.72,
+        "duration": 3.76,
+        "end": 491.48,
+        "text": "as we saw in the documentation, is we",
+        "language": "en"
+      },
+      {
+        "start": 489.28,
+        "duration": 4.92,
+        "end": 494.2,
+        "text": "can take request.session, and in the",
+        "language": "en"
+      },
+      {
+        "start": 491.48,
+        "duration": 4.4,
+        "end": 495.88,
+        "text": "view, we can set modified to true. Now,",
+        "language": "en"
+      },
+      {
+        "start": 494.2,
+        "duration": 3.24,
+        "end": 497.44,
+        "text": "when we do that, if we go back to the",
+        "language": "en"
+      },
+      {
+        "start": 495.88,
+        "duration": 3.8,
+        "end": 499.68,
+        "text": "page here, I'm going to refresh this",
+        "language": "en"
+      },
+      {
+        "start": 497.44,
+        "duration": 4.4,
+        "end": 501.84,
+        "text": "page, and then let's go back to Django",
+        "language": "en"
+      },
+      {
+        "start": 499.68,
+        "duration": 3.8,
+        "end": 503.48,
+        "text": "Silk, and let's go back to the request",
+        "language": "en"
+      },
+      {
+        "start": 501.84,
+        "duration": 3.84,
+        "end": 505.67999999999995,
+        "text": "summary and go to the most recent",
+        "language": "en"
+      },
+      {
+        "start": 503.48,
+        "duration": 4.2,
+        "end": 507.68,
+        "text": "request. And when we look at the SQL,",
+        "language": "en"
+      },
+      {
+        "start": 505.68,
+        "duration": 4.72,
+        "end": 510.40000000000003,
+        "text": "notice the update statement has been",
+        "language": "en"
+      },
+      {
+        "start": 507.68,
+        "duration": 5.359,
+        "end": 513.039,
+        "text": "sent to the database, and we have now",
+        "language": "en"
+      },
+      {
+        "start": 510.4,
+        "duration": 4.72,
+        "end": 515.12,
+        "text": "updated the session table for the user",
+        "language": "en"
+      },
+      {
+        "start": 513.039,
+        "duration": 4.281,
+        "end": 517.3199999999999,
+        "text": "who has that key. Now, if we go back to",
+        "language": "en"
+      },
+      {
+        "start": 515.12,
+        "duration": 4.12,
+        "end": 519.24,
+        "text": "the terminal, let's go and expand this",
+        "language": "en"
+      },
+      {
+        "start": 517.32,
+        "duration": 3.52,
+        "end": 520.84,
+        "text": "and go to the bottom. So, I had to find",
+        "language": "en"
+      },
+      {
+        "start": 519.24,
+        "duration": 3.96,
+        "end": 523.2,
+        "text": "that there. Basically, what's happening",
+        "language": "en"
+      },
+      {
+        "start": 520.84,
+        "duration": 4.8,
+        "end": 525.64,
+        "text": "is that we have the item one now in the",
+        "language": "en"
+      },
+      {
+        "start": 523.2,
+        "duration": 4.8,
+        "end": 528.0,
+        "text": "items key, but if we go back to this",
+        "language": "en"
+      },
+      {
+        "start": 525.64,
+        "duration": 4.88,
+        "end": 530.52,
+        "text": "page here and refresh the page, and then",
+        "language": "en"
+      },
+      {
+        "start": 528.0,
+        "duration": 4.72,
+        "end": 532.72,
+        "text": "look at the terminal again, we see what",
+        "language": "en"
+      },
+      {
+        "start": 530.52,
+        "duration": 4.92,
+        "end": 535.4399999999999,
+        "text": "we expected to see initially, and that's",
+        "language": "en"
+      },
+      {
+        "start": 532.72,
+        "duration": 4.4,
+        "end": 537.12,
+        "text": "that the items list is now stateful.",
+        "language": "en"
+      },
+      {
+        "start": 535.44,
+        "duration": 4.2,
+        "end": 539.6400000000001,
+        "text": "It's being saved to the database, which",
+        "language": "en"
+      },
+      {
+        "start": 537.12,
+        "duration": 4.32,
+        "end": 541.44,
+        "text": "means when the second append comes in,",
+        "language": "en"
+      },
+      {
+        "start": 539.64,
+        "duration": 4.56,
+        "end": 544.1999999999999,
+        "text": "Django is able to pull out the initial",
+        "language": "en"
+      },
+      {
+        "start": 541.44,
+        "duration": 4.32,
+        "end": 545.7600000000001,
+        "text": "state, and then append to that state.",
+        "language": "en"
+      },
+      {
+        "start": 544.2,
+        "duration": 3.8,
+        "end": 548.0,
+        "text": "So, we now have the proper behavior",
+        "language": "en"
+      },
+      {
+        "start": 545.76,
+        "duration": 4.52,
+        "end": 550.28,
+        "text": "here. Each time the user goes to this",
+        "language": "en"
+      },
+      {
+        "start": 548.0,
+        "duration": 4.28,
+        "end": 552.28,
+        "text": "page, it's appending these items to the",
+        "language": "en"
+      },
+      {
+        "start": 550.28,
+        "duration": 4.12,
+        "end": 554.4,
+        "text": "list, and all we need to do is when",
+        "language": "en"
+      },
+      {
+        "start": 552.28,
+        "duration": 4.08,
+        "end": 556.36,
+        "text": "we're modifying that state, such as",
+        "language": "en"
+      },
+      {
+        "start": 554.4,
+        "duration": 4.24,
+        "end": 558.64,
+        "text": "adding and removing elements from a list",
+        "language": "en"
+      },
+      {
+        "start": 556.36,
+        "duration": 4.72,
+        "end": 561.08,
+        "text": "or a nested dictionary, we just set the",
+        "language": "en"
+      },
+      {
+        "start": 558.64,
+        "duration": 4.4,
+        "end": 563.04,
+        "text": "modified flag to true, and Django will",
+        "language": "en"
+      },
+      {
+        "start": 561.08,
+        "duration": 3.56,
+        "end": 564.64,
+        "text": "then save the session data to the",
+        "language": "en"
+      },
+      {
+        "start": 563.04,
+        "duration": 3.6,
+        "end": 566.64,
+        "text": "database, and that allows you to",
+        "language": "en"
+      },
+      {
+        "start": 564.64,
+        "duration": 3.64,
+        "end": 568.28,
+        "text": "preserve those updates. So, that's a",
+        "language": "en"
+      },
+      {
+        "start": 566.64,
+        "duration": 3.32,
+        "end": 569.96,
+        "text": "short demo, but it's useful knowledge",
+        "language": "en"
+      },
+      {
+        "start": 568.28,
+        "duration": 3.8,
+        "end": 572.0799999999999,
+        "text": "for Django, although maybe not the most",
+        "language": "en"
+      },
+      {
+        "start": 569.96,
+        "duration": 3.72,
+        "end": 573.6800000000001,
+        "text": "exciting topic in the world. One thing I",
+        "language": "en"
+      },
+      {
+        "start": 572.08,
+        "duration": 3.96,
+        "end": 576.0400000000001,
+        "text": "want to say is that something like an",
+        "language": "en"
+      },
+      {
+        "start": 573.68,
+        "duration": 4.4,
+        "end": 578.0799999999999,
+        "text": "LLM might be able to give you this code,",
+        "language": "en"
+      },
+      {
+        "start": 576.04,
+        "duration": 3.88,
+        "end": 579.92,
+        "text": "but would you understand it? And just to",
+        "language": "en"
+      },
+      {
+        "start": 578.08,
+        "duration": 4.32,
+        "end": 582.4000000000001,
+        "text": "share my opinion at the end here, I",
+        "language": "en"
+      },
+      {
+        "start": 579.92,
+        "duration": 4.6,
+        "end": 584.52,
+        "text": "think with the job market as it is,",
+        "language": "en"
+      },
+      {
+        "start": 582.4,
+        "duration": 4.24,
+        "end": 586.64,
+        "text": "understanding these concepts can really",
+        "language": "en"
+      },
+      {
+        "start": 584.52,
+        "duration": 4.44,
+        "end": 588.96,
+        "text": "set you apart and can help you get",
+        "language": "en"
+      },
+      {
+        "start": 586.64,
+        "duration": 4.28,
+        "end": 590.92,
+        "text": "success in this industry in what is",
+        "language": "en"
+      },
+      {
+        "start": 588.96,
+        "duration": 4.6,
+        "end": 593.5600000000001,
+        "text": "becoming more and more competitive and a",
+        "language": "en"
+      },
+      {
+        "start": 590.92,
+        "duration": 4.32,
+        "end": 595.24,
+        "text": "more AI-dominated industry. So, this has",
+        "language": "en"
+      },
+      {
+        "start": 593.56,
+        "duration": 3.84,
+        "end": 597.4,
+        "text": "been a small video with some useful",
+        "language": "en"
+      },
+      {
+        "start": 595.24,
+        "duration": 3.88,
+        "end": 599.12,
+        "text": "Django knowledge. If you have any other",
+        "language": "en"
+      },
+      {
+        "start": 597.4,
+        "duration": 3.92,
+        "end": 601.3199999999999,
+        "text": "requests, let me know in the comments",
+        "language": "en"
+      },
+      {
+        "start": 599.12,
+        "duration": 3.8,
+        "end": 602.92,
+        "text": "for Django material. And if you want to",
+        "language": "en"
+      },
+      {
+        "start": 601.32,
+        "duration": 3.24,
+        "end": 604.5600000000001,
+        "text": "support the channel, check out our",
+        "language": "en"
+      },
+      {
+        "start": 602.92,
+        "duration": 3.52,
+        "end": 606.4399999999999,
+        "text": "coffee page. We've got a link in the",
+        "language": "en"
+      },
+      {
+        "start": 604.56,
+        "duration": 3.84,
+        "end": 608.4,
+        "text": "comments. And thanks again to all",
+        "language": "en"
+      },
+      {
+        "start": 606.44,
+        "duration": 3.24,
+        "end": 609.6800000000001,
+        "text": "supporters of the channel. Thanks for",
+        "language": "en"
+      },
+      {
+        "start": 608.4,
+        "duration": 4.36,
+        "end": 612.76,
+        "text": "watching this video, and we'll see you",
+        "language": "en"
+      },
+      {
+        "start": 609.68,
+        "duration": 3.08,
+        "end": 612.76,
+        "text": "soon in the next one.",
+        "language": "en"
+      }
+    ]
+  }
+}
