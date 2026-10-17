@@ -156,3 +156,5 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     # Looks for "Authorization: Bearer <token>"
 }
+
+CELERY_BROKER_URL = '127.0.0.1:6379'
