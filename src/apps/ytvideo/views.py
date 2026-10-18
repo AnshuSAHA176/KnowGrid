@@ -3,11 +3,16 @@ from .models import YtVideo, YtVideoChunks
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .serializer import VideoCreateSerializer, VideoTitleSerializer,VideoChunksSerializer
+from .serializer import (
+    VideoCreateSerializer,
+    VideoTitleSerializer,
+    VideoChunksSerializer,
+)
 from django.db import IntegrityError
 from rest_framework.views import APIView
 from pgvector.django import CosineDistance
 from .RAG.generate_embedding import user_embedding_generator
+from .RAG.crag import crag
 
 
 class VideoView(generics.ListCreateAPIView):
@@ -55,12 +60,10 @@ class RetriveView(APIView):
                 {"error": "Please follow this stucture {'message':'your query'}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        user_embedding = user_embedding_generator(user_query=message)
-        chunks = YtVideoChunks.objects.filter(video=youtube_id).annotate(
-            distance=CosineDistance("embeddings", user_embedding)
-        ).order_by("distance")[:5]
-        return Response(
-            
-                VideoChunksSerializer(chunks,many=True).data
-            
+        result = crag().invoke(
+            {
+                "user_query": message,
+                "youtube_id": youtube_id,
+            }
         )
+        return Response({"response": result["answer"]})
