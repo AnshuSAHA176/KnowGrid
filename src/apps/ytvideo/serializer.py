@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import YtVideo
+from .models import YtVideo, YtVideoChunks
 from .transcipts_extract import YouTubeProcessor
 from django.db import transaction
 from .worker import process_youtube_video
@@ -10,13 +10,11 @@ class VideoCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = YtVideo
-        fields = ["url","youtube_id", "status", "created_at"]
+        fields = ["url", "youtube_id", "status", "created_at"]
         extra_kwargs = {
-            
-                "youtube_id": {"read_only": True},
-                "status": {"read_only": True},
-                "created_at": {"read_only": True},
-            
+            "youtube_id": {"read_only": True},
+            "status": {"read_only": True},
+            "created_at": {"read_only": True},
         }
 
     def validate(self, attrs):
@@ -49,3 +47,9 @@ class VideoTitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = YtVideo
         fields = ["email", "youtube_id", "status"]
+
+
+class VideoChunksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = YtVideoChunks
+        fields = ["text", "start_time", "end_time"]

@@ -38,3 +38,35 @@ def generate_embeddings(texts: list[str]) -> list[list[float]]:
         raise RuntimeError("Embedding count does not match input count")
 
     return embeddings
+
+
+
+
+
+def user_embedding_generator(user_query:str) -> list[float]:
+
+    url = (
+        f"https://api.cloudflare.com/client/v4/accounts/"
+        f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/baai/bge-m3"
+    )
+
+    response = requests.post(
+        url,
+        headers={
+            "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "text": [user_query],
+        },
+        timeout=60,
+    )
+
+    response.raise_for_status()
+
+    data = response.json()
+
+    if not data.get("success"):
+        raise RuntimeError(data)
+
+    return data["result"]["data"][0]
