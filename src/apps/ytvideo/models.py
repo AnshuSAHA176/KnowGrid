@@ -19,7 +19,7 @@ class YtVideo(models.Model):
     default=ProcessingStatus.PENDING,
     db_index=True,
 )
-    metadata = models.JSONField(default={})
+    metadata = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -58,7 +58,7 @@ class Conversation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'user:- {self.user.email} | {self.question}'
+        return f"User: {self.user.email} | Video: {self.video_id} | Conversation: {self.id}"
     class Meta:
         indexes = [
             models.Index(fields=['user','video'],name='user_video_idx')

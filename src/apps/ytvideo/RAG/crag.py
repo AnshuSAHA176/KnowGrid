@@ -29,8 +29,13 @@ class Correctivevalidator(BaseModel):
     quality: Literal["good", "retry"]
 
 
+
+
+
 class RetryQuery(BaseModel):
-    rewritten_query: str = Field(description="An improved semantic search query.")
+    rewritten_query: str = Field(
+        description="An improved semantic search query."
+    )
 
 
 class GeneratedAnswer(BaseModel):
@@ -108,46 +113,38 @@ Retrieved transcript chunks:
 
 def retry(state: State) -> dict:
     model = get_model()
-    structured_llm = model.with_structured_output(RetryQuery)
 
-    result = structured_llm.invoke(
-        [
-            SystemMessage(content="""
-You rewrite search queries for KnowGrid's CRAG pipeline.
+    structured_llm = model.with_structured_output(
+        RetryQuery,
+        method="json_mode",
+    )
 
-The previous retrieval did not provide sufficient evidence.
+    result = structured_llm.invoke([
+        SystemMessage(content="""
+Rewrite the user's query to improve semantic retrieval.
 
-Your task:
-1. Preserve the original user's intent.
-2. Examine the retrieved transcript chunks and identify the retrieval gap.
-3. Use relevant terminology and concepts from the transcript where useful.
-4. Create a concise query that is likely to retrieve better evidence.
-5. Do not answer the question.
-6. Do not invent facts or timestamps.
-7. Do not merely repeat the original query unchanged.
-8. Return one standalone semantic search query.
+Preserve the original intent.
+Use the retrieved chunks to identify useful terminology.
+Do not answer the question.
+Return valid JSON with exactly one field:
+{"rewritten_query": "your improved search query"}
 """),
-            HumanMessage(content=f"""
-Original user question:
+        HumanMessage(content=f"""
+Original question:
 {state.user_query}
 
-Previous search query:
-{state.search_query or state.user_query}
-
-Retrieved transcript chunks:
+Retrieved chunks:
 {state.chunks}
 
-Rewrite the search query to improve the next retrieval attempt.
+Write an improved search query.
 """),
-        ]
-    )
+    ])
 
     return {
         "search_query": result.rewritten_query,
         "retry_count": state.retry_count + 1,
         "quality": "retry",
     }
-
 
 def generation(state: State) -> dict:
     model = get_model()

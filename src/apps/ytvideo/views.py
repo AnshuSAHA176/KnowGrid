@@ -15,7 +15,7 @@ from .RAG.generate_embedding import user_embedding_generator
 from .RAG.crag import crag
 from .models import Conversation
 from django.shortcuts import get_object_or_404
-
+from django.db import transaction
 
 class VideoView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -54,9 +54,10 @@ class VideoView(generics.ListCreateAPIView):
 class RetriveView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, youtube_id,conversation_id):
+    def post(self, request, youtube_id):
         try:
             message = request.data["message"]
+            conversation_id = request.data.get("conversation_id")
         except KeyError:
             return Response(
                 {"error": "Please follow this stucture {'message':'your query'}"},
@@ -67,14 +68,36 @@ class RetriveView(APIView):
         else:
             conversation = Conversation.objects.create(
                 user=request.user,
-                video = youtube_id,
+                video_id = youtube_id,
                  messages=[],
             )
 
         result = crag().invoke(
             {
-                "user_query": message,
+                "user_query": message.strip(),
                 "youtube_id": youtube_id,
             }
         )
-        return Response({"response": result["answer"]})
+        answer = result["answer"]
+        with transaction.atomic():
+            conversation.messages.extend([
+                {
+                    "role": "user",
+                    "content": message.strip(),
+                },
+                {
+                    "role": "assistant",
+                    "content": answer,
+                },
+            ])
+            conversation.save(
+                update_fields=["messages", "updated_at"]
+            )
+
+        return Response(
+            {
+                "conversation_id": str(conversation.id),
+                "response": answer,
+            },
+            status=status.HTTP_200_OK,
+        )
