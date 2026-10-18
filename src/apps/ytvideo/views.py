@@ -76,6 +76,7 @@ class RetriveView(APIView):
             {
                 "user_query": message.strip(),
                 "youtube_id": youtube_id,
+                "chat_history": conversation.messages[-6:],
             }
         )
         answer = result["answer"]
