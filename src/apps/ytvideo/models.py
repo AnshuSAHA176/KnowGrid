@@ -1,7 +1,7 @@
 from django.db import models
 from pgvector.django import VectorField
 from django.conf import settings
-
+import uuid
 
 class YtVideo(models.Model):
     class ProcessingStatus(models.TextChoices):
@@ -47,4 +47,20 @@ class YtVideoChunks(models.Model):
                 fields=["start_time", "end_time"], name="start_time&end_time_inx"
             )
         ]
-        
+
+
+class Conversation(models.Model):
+    id = models.UUIDField(primary_key=True,default=uuid.uuid4)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='conversations')
+    video = models.ForeignKey(YtVideo,on_delete=models.CASCADE,related_name='conversations')
+    messages = models.JSONField(default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'user:- {self.user.email} | {self.question}'
+    class Meta:
+        indexes = [
+            models.Index(fields=['user','video'],name='user_video_idx')
+
+        ]

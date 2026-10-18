@@ -13,6 +13,8 @@ from rest_framework.views import APIView
 from pgvector.django import CosineDistance
 from .RAG.generate_embedding import user_embedding_generator
 from .RAG.crag import crag
+from .models import Conversation
+from django.shortcuts import get_object_or_404
 
 
 class VideoView(generics.ListCreateAPIView):
@@ -52,7 +54,7 @@ class VideoView(generics.ListCreateAPIView):
 class RetriveView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, youtube_id):
+    def post(self, request, youtube_id,conversation_id):
         try:
             message = request.data["message"]
         except KeyError:
@@ -60,6 +62,15 @@ class RetriveView(APIView):
                 {"error": "Please follow this stucture {'message':'your query'}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if conversation_id:
+            conversation = get_object_or_404(Conversation,id=conversation_id,video_id=youtube_id,user=request.user)
+        else:
+            conversation = Conversation.objects.create(
+                user=request.user,
+                video = youtube_id,
+                 messages=[],
+            )
+
         result = crag().invoke(
             {
                 "user_query": message,
