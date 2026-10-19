@@ -8,7 +8,13 @@ class ConceptsValidator(BaseModel):
     concept: str = Field(
         description="One distinct, technically meaningful concept supported by the transcript."
     )
-
+class MergedConcepts(BaseModel):
+    concepts: list[str] = Field(
+        description=(
+            "A deduplicated list of distinct, technically meaningful "
+            "programming concepts extracted from the video."
+        )
+    )
 
 class State(BaseModel):
     youtube_id: str
@@ -87,3 +93,63 @@ Rules:
         concepts.append(result)
 
     return {"concepts": concepts}
+
+
+from langchain_core.messages import SystemMessage, HumanMessage
+from apps.ytvideo.RAG.llm import get_model
+
+
+def merge_concepts(state: State) -> dict:
+    if not state.concepts:
+        return {"concepts": []}
+
+    llm = get_model("openai/gpt-oss-20b")
+    structured_llm = llm.with_structured_output(MergedConcepts)
+
+    # Convert Pydantic objects into plain strings.
+    concepts = [
+        item.concept if isinstance(item, ConceptsValidator)
+        else str(item)
+        for item in state.concepts
+    ]
+
+    system_message = SystemMessage(content="""
+You are a technical concept consolidation assistant for KnowGrid.
+
+Your task is to consolidate programming concepts extracted from
+different chunks of a YouTube tutorial.
+
+Rules:
+1. Merge concepts that describe the same underlying technical idea.
+2. Remove exact and semantic duplicates.
+3. Preserve distinct concepts, even when they are related.
+4. Keep each concept concise, precise, and technically meaningful.
+5. Preserve the original technical meaning; do not invent concepts.
+6. Do not add information that is unsupported by the input.
+7. Return a flat list of unique concepts.
+8. Do not generate coding challenges, explanations, solutions,
+   or test cases.
+9. Preserve useful technical names, APIs, and function names.
+""")
+
+    human_message = HumanMessage(
+        content=f"Consolidate these extracted concepts:\n{concepts}"
+    )
+
+    result = structured_llm.invoke([system_message, human_message])
+
+    return {"concepts": result.concepts}
+
+def get_hierarchical_pipline():
+    builder = StateGraph(State)
+    builder.add_node("load_chunks", load_transcript_chunks)
+    builder.add_node("merge_small_chunks", merge_small_chunks)
+    builder.add_node("get_topics", get_topics)
+    builder.add_node("merge_concepts", merge_concepts)
+
+    builder.add_edge(START, "load_chunks")
+    builder.add_edge("load_chunks", "merge_small_chunks")
+    builder.add_edge("merge_small_chunks", "get_topics")
+    builder.add_edge("get_topics", "merge_concepts")
+    builder.add_edge("merge_concepts", END)
+    return builder.compile()
