@@ -140,7 +140,7 @@ Rules:
 
     return {"concepts": result.concepts}
 
-def get_hierarchical_pipline():
+def get_hierarchical_pipeline():
     builder = StateGraph(State)
     builder.add_node("load_chunks", load_transcript_chunks)
     builder.add_node("merge_small_chunks", merge_small_chunks)
