@@ -285,7 +285,7 @@ def route_after_grading(
 
     if state.quality == "good":
         return "generation"
-
+    print(f"ATTEMTED :- {state.retry_count}")
     if state.retry_count < MAX_RETRIES:
         return "retry"
 
