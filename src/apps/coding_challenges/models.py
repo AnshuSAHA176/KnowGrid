@@ -1,7 +1,9 @@
+
 from django.db import models
-import uuid
-from apps.ytvideo.models import YtVideo
 from django.conf import settings
+import uuid
+
+from apps.ytvideo.models import YtVideo
 
 
 class CodingChallenge(models.Model):
@@ -10,11 +12,18 @@ class CodingChallenge(models.Model):
         MEDIUM = "medium", "Medium"
         HARD = "hard", "Hard"
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    video = models.ForeignKey(YtVideo, on_delete=models.PROTECT, related_name="codings")
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    video = models.ForeignKey(
+        YtVideo,
+        on_delete=models.PROTECT,
+        related_name="codings",
+    )
     title = models.CharField(max_length=300)
     description = models.TextField()
-    difficulty = models.CharField(max_length=300, choices=DifficultyChoices.choices)
+    difficulty = models.CharField(
+        max_length=10,
+        choices=DifficultyChoices.choices,
+    )
     constraints = models.TextField()
     starter_code = models.TextField()
     reference_solution = models.TextField()
@@ -25,16 +34,18 @@ class CodingChallenge(models.Model):
 
 
 class TestCase(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     challenge = models.ForeignKey(
-        CodingChallenge, on_delete=models.CASCADE, related_name="testcases"
+        CodingChallenge,
+        on_delete=models.CASCADE,
+        related_name="testcases",
     )
     input_data = models.JSONField()
     expected_output = models.JSONField()
     is_hidden = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.challenge.title
+        return f"Test case for {self.challenge.title}"
 
 
 class Submission(models.Model):
@@ -44,17 +55,24 @@ class Submission(models.Model):
         ACCEPTED = "accepted", "Accepted"
         FAILED = "failed", "Failed"
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
-        settings.AUTH_USER_MODLE, on_delete=models.CASCADE, related_name="submissions"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="submissions",
     )
     challenge = models.ForeignKey(
-        CodingChallenge, models.CASCADE, related_name="submissions"
+        CodingChallenge,
+        on_delete=models.CASCADE,
+        related_name="submissions",
     )
     source_code = models.TextField()
     status = models.CharField(
-        max_length=200, choices=StatusChoices.choices, default=StatusChoices.PENDING
+        max_length=10,
+        choices=StatusChoices.choices,
+        default=StatusChoices.PENDING,
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return self.challenge.title
+        return f"{self.user} - {self.challenge.title}"

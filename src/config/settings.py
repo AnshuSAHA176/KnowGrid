@@ -42,6 +42,7 @@ INSTALLED_APPS = [
      "rest_framework_simplejwt.token_blacklist",
      'apps.ytvideo',
      'pgvector',
+     'apps.coding_challenges',
 
 ]
 

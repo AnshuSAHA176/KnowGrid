@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class CodingChallengesConfig(AppConfig):
-    name = 'coding_challenges'
+    name = 'apps.coding_challenges'

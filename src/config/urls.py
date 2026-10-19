@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.accounts.urls')),
     path('video/', include('apps.ytvideo.urls')),
+    path('coding/', include('apps.coding_challenges.urls')),
 ]
