@@ -1,24 +1,31 @@
-from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser,IsAuthenticated
-from rest_framework import status,generics,viewsets
-from .models import CodingChallenge,TestCase,Submission
-from .serializer import CodingChallengTitleSerializer,CodingChallengSerializer
-# 
+
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
+from .models import CodingChallenge
+from .serializer import (
+    CodingChallengSerializer,
+    CodingChallengTitleSerializer,
+)
+
 
 class ChallengesView(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
-    def list(self, request, *args, **kwargs):
-        codingchallenges = CodingChallenge.objects.filter(
-            video__youtube_id = self.kwargs.get('youtube_id'),
-        )
-        serializer = CodingChallengSerializer(codingchallenges,many=True)
+    def get_queryset(self):
+        queryset = CodingChallenge.objects.all()
 
-        return Response(serializer.data)
-    def get(self,request,challang_id):
-        codingchallenges = CodingChallenge.objects.filter(
-                    id = challang_id,
+        youtube_id = self.kwargs.get("youtube_id")
 
-                )
-        serializer = CodingChallengSerializer(codingchallenges)
-        return Response(serializer.data)
+        if youtube_id:
+            queryset = queryset.filter(
+                video__youtube_id=youtube_id
+            )
+
+        return queryset.prefetch_related("testcases")
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return CodingChallengTitleSerializer
+
+        return CodingChallengSerializer
