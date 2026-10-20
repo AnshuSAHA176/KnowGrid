@@ -81,11 +81,16 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
 
 class SubmissionViewSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email',read_only=True)
+    title = serializers.CharField(source='challenge.title',read_only=True)
     class Meta:
         model = Submission
         fields = [
-            "user__email",
-            "challenge__title",
+            'id',
+            "email",
+            "title",
             "status",
             "created_at",
         ]
+
+        
