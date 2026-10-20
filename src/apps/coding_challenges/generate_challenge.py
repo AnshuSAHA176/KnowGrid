@@ -1,83 +1,109 @@
-from pydantic import BaseModel, Field
+
+from typing import Any, Literal
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class GeneratedTestCase(BaseModel):
-    input_data: dict = Field(
-        description="Input arguments for a test case"
-    )
-    expected_output: str = Field(
-        description="Expected output from the submitted solution"
-    )
-    is_hidden: bool = Field(default=True)
+    model_config = ConfigDict(extra="forbid")
+
+    input_data: dict[str, Any]
+    expected_output: Any
+    is_hidden: bool = True
 
 
 class GeneratedChallenge(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     title: str
     description: str
-    difficulty: str = Field(
-        description="One of: easy, medium, hard"
-    )
+    difficulty: Literal["easy", "medium", "hard"]
     constraints: str
-    supported_languages: list[str] = Field(
-        description="Languages this challenge supports"
-    )
-    starter_code: dict[str, str] = Field(
-        description="Starter code keyed by language, e.g. python or javascript"
-    )
-    reference_solution: dict[str, str] = Field(
-        description="Reference solution keyed by language"
-    )
-    test_cases: list[GeneratedTestCase]
+    starter_code: str
+    reference_solution: str
+    test_cases: list[GeneratedTestCase] = Field(min_length=1)
+
+
+class GeneratedChallenges(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    challenges: list[GeneratedChallenge]
+
+
 
 from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.exceptions import OutputParserException
+
 from apps.ytvideo.RAG.llm import get_model
 
 
-SUPPORTED_LANGUAGES = ["python", "javascript", "java", "cpp"]
+def generate_challenges(
+    concepts: list[str],
+) -> list[GeneratedChallenge]:
 
+    if not concepts:
+        return []
 
-def generate_challenge(
-    concept: str,
-    context: list[str],
-) -> GeneratedChallenge:
     llm = get_model("openai/gpt-oss-20b")
-    structured_llm = llm.with_structured_output(GeneratedChallenge)
 
-    system_message = SystemMessage(content=f"""
-You are a programming challenge designer for KnowGrid.
+    structured_llm = llm.with_structured_output(
+        GeneratedChallenges,
+        method="json_schema",
+    )
 
-Generate one high-quality coding challenge based on the supplied
-programming concept and tutorial excerpts.
+    system_prompt = SystemMessage(
+        content="""
+You are KnowGrid's coding challenge generator.
+
+Select only useful, practically testable programming concepts
+from the supplied list.
+
+For every challenge, return these fields separately:
+- title
+- description
+- difficulty
+- constraints
+- starter_code
+- reference_solution
+- test_cases
 
 Rules:
-1. Base the challenge on the supplied concept and context.
-2. Write a clear, self-contained problem statement.
-3. Define precise constraints, input format, and output format.
-4. Choose an appropriate difficulty: easy, medium, or hard.
-5. Generate starter code and a reference solution for each of these
-   languages: {", ".join(SUPPORTED_LANGUAGES)}.
-6. Ensure every language uses the same problem requirements and
-   equivalent function signatures or input/output contracts.
-7. Use valid, idiomatic syntax for each language.
-8. Generate test cases covering normal cases, edge cases, and
-   boundary conditions.
-9. Ensure expected outputs are consistent across languages.
-10. Do not invent concepts unsupported by the supplied material.
-11. Never put reference solutions in starter code.
-12. Return structured data matching the requested schema.
-""")
+1. difficulty must be easy, medium, or hard.
+2. description contains ONLY the problem statement and examples.
+3. constraints contains ONLY the constraints.
+4. starter_code contains executable Python function signatures
+   with TODO/pass placeholders, never the reference solution.
+5. reference_solution contains the complete Python implementation.
+6. test_cases is a list of objects, each containing input_data,
+   expected_output, and is_hidden.
+7. input_data must be a JSON object containing the function arguments.
+8. expected_output must match the reference solution.
+9. Use deterministic problems and include normal and edge cases.
+10. Do not put Markdown containing the entire challenge inside description.
+11. Do not omit any required field.
+12. Do not invent concepts beyond the supplied list.
+13. Return an empty challenges list only if none of the concepts
+    can reasonably produce a coding exercise.
 
-    human_message = HumanMessage(content=f"""
-Concept:
-{concept}
+Return only data matching the required schema.
+"""
+    )
 
-Supporting tutorial excerpts:
-{chr(10).join(context)}
+    human_message = HumanMessage(
+        content=(
+            "Generate practical coding challenges for these concepts. "
+            "Keep every field separate and populated:\n"
+            f"{concepts}"
+        )
+    )
 
-Generate one language-independent coding challenge.
-""")
+    try:
+        result = structured_llm.invoke(
+            [system_prompt, human_message]
+        )
+    except OutputParserException as exc:
+        raise ValueError(
+            "Groq returned challenge data that did not match "
+            "the GeneratedChallenges schema."
+        ) from exc
 
-    return structured_llm.invoke([
-        system_message,
-        human_message,
-    ])
+    return result.challenges
