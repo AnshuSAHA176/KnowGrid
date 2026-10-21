@@ -10,6 +10,8 @@ from .serializer import (
     SubmissionViewSerializer
 )
 from rest_framework.response import Response
+from .runner_test import execute_code
+
 
 class ChallengesView(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -46,5 +48,6 @@ class SubmissionView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer= self.get_serializer(data=self.request.data,context={'request':self.request})
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        instance = serializer.save()
+        execute_code.delay(instance.id) 
         return Response(serializer.data)
