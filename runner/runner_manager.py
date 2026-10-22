@@ -4,7 +4,22 @@ import tempfile
 from pathlib import Path
 import uuid
 
-def run_submission(source_code: str, test_input: dict) -> dict:
+
+
+
+import ast
+
+
+def get_function_name(starter_code: str) -> str:
+    tree = ast.parse(starter_code)
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return node.name
+
+    raise ValueError("No function definition found in starter code")
+
+def run_submission(source_code: str, test_input: dict,function_name:str) -> dict:
     with tempfile.TemporaryDirectory(prefix="knowgrid-") as temp_dir:
         workspace = Path(temp_dir)
 
@@ -16,6 +31,7 @@ def run_submission(source_code: str, test_input: dict) -> dict:
         command = [
             "docker", "run",
             "--name", container_name,
+            "--env", f"FUNCTION_NAME={function_name}",
             "--rm",
             "--network", "none",
             "--memory", "128m",

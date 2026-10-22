@@ -72,6 +72,10 @@ class Submission(models.Model):
         choices=StatusChoices.choices,
         default=StatusChoices.PENDING,
     )
+
+    passed_tests = models.PositiveIntegerField(default=0)
+    total_tests = models.PositiveIntegerField(default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

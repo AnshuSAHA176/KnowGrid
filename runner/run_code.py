@@ -1,5 +1,6 @@
+
 import json
-import sys
+import os
 from pathlib import Path
 
 
@@ -8,19 +9,27 @@ def main():
 
     submission_path = workspace / "submission.py"
     input_path = workspace / "input.json"
+
     source_code = submission_path.read_text()
     test_input = json.loads(input_path.read_text())
+
     namespace = {"__name__": "submission"}
 
     exec(compile(source_code, "submission.py", "exec"), namespace)
-    solution = namespace.get("solution")
+
+    function_name = os.environ.get("FUNCTION_NAME", "solution")
+    solution = namespace.get(function_name)
 
     if not callable(solution):
-        raise ValueError("Your code must define a function named solution")
+        raise ValueError(
+            f"Expected function {function_name!r} was not found"
+        )
+
     if not isinstance(test_input, dict):
         raise ValueError("Test input must be a JSON object")
 
     result = solution(**test_input)
+
     print(json.dumps({"ok": True, "result": result}))
 
 
