@@ -9,6 +9,9 @@ sys.path.insert(0, str(PROJECTROOT))
 
 from runner.runner_manager import run_submission, get_function_name
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 
 @shared_task(bind=True, ignore_result=True)
 def execute_code(self, submission_id):
@@ -51,7 +54,21 @@ def execute_code(self, submission_id):
         submission.passed_tests = passed_tests
         submission.total_tests = total_tests
         submission.save(update_fields=["status", "passed_tests", "total_tests"])
+        channel_layer = get_channel_layer()
 
+        payload = {
+            "submission_id": str(submission.id),
+            "status": submission.status,
+            "passed_tests": submission.passed_tests,
+            "total_tests": submission.total_tests,
+        }
+        async_to_sync(channel_layer.group_send)(
+            f"submission_{submission_id}",
+            {
+                "type": "send_event",
+                "message": payload,
+            },
+        )
     except Exception as e:
         print("Submission execution failed:", e)
         submission.status = Submission.StatusChoices.FAILED
