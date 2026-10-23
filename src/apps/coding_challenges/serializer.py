@@ -95,4 +95,13 @@ class SubmissionViewSerializer(serializers.ModelSerializer):
         ]
 
 
-cla
+class ContinuLarningSerializer(serializers.ModelSerializer):
+    challenge_id = serializers.CharField(source='challenge.id',read_only=True)
+    title=serializers.CharField(source='challenge.title',read_only=True)
+    class Meta:
+        model=Submission
+        fields=[
+            'challenge_id',
+            'title'
+            'status'
+        ]
