@@ -90,7 +90,9 @@ class SubmissionViewSerializer(serializers.ModelSerializer):
             "email",
             "title",
             "status",
+            'passed_tests',
             "created_at",
         ]
 
-        
+
+cla

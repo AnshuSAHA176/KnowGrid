@@ -40,3 +40,5 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError('Please enter a valid email & password')
         attrs['user'] =user
         return attrs
+
+
