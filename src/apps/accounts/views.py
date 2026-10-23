@@ -7,7 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from apps.coding_challenges.models import Submission
 from django.db.models import Count, Q, F
-from apps.coding_challenges.serializer import SubmissionViewSerializer
+from apps.coding_challenges.serializer import SubmissionViewSerializer,ContinuLarningSerializer
 
 
 class RegisterView(generics.CreateAPIView):
@@ -73,5 +73,5 @@ class Dashboard(APIView):
             "recent_submissions": SubmissionViewSerializer(
                 submission[:3], many=True
             ).data,
-            "continue_learning": [],
+            "continue_learning": ContinuLarningSerializer(continue_learning,many=True).data,
         }
