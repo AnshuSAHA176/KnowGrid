@@ -5,9 +5,12 @@ from .models import User
 from .serializer import RegisterSerializer, LoginSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from apps.coding_challenges.models import Submission
-from django.db.models import Count, Q, F
-from apps.coding_challenges.serializer import SubmissionViewSerializer,ContinuLarningSerializer
+from apps.coding_challenges.models import Submission, CodingChallenge
+from django.db.models import Count, Q, F, Exists, OuterRef, Subquery
+from apps.coding_challenges.serializer import (
+    SubmissionViewSerializer,
+    ContinuLarningSerializer,
+)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -34,44 +37,66 @@ class Dashboard(APIView):
 
     def get(self, request):
 
-        submission = (
-            Submission.objects.filter(user=request.user)
-            .order_by("-created_at")
-            .aggregate(
-                challenges_solved=Count(
-                    "id",
-                    filter=Q(status=Submission.StatusChoices.ACCEPTED),
-                ),
-                total_submissions=Count("id"),
-            )
+        stats_submission = Submission.objects.filter(user=request.user).aggregate(
+            challenges_solved=Count(
+                "id", filter=Q(status=Submission.StatusChoices.ACCEPTED), distinct=True
+            ),
+            total_submissions=Count("id"),
         )
 
-        continue_learning = Submission.objects.filter(
-            user=request.user,
-            status__in=[
-                Submission.StatusChoices.FAILED,
-                Submission.StatusChoices.PENDING,
-            ],
+        submission = (
+            Submission.objects.select_related("challenge", "user")
+            .filter(
+                user=request.user,
+            )
+            .order_by("-created_at")
+        )
+        latest_submission = (
+            Submission.objects.select_related("challenge")
+            .filter(user=request.user, challenge_id=OuterRef("pk"))
+            .order_by("-created_at", "-pk")
+        )
+
+        continue_learning = (
+            CodingChallenge.objects.annotate(
+                latest_submission_id=Subquery(latest_submission.values("id")[:1]),
+                latest_submission_status=Subquery(
+                    latest_submission.values("status")[:1]
+                ),
+            )
+            .filter(
+                latest_submission_status__in=[
+                    Submission.StatusChoices.FAILED,
+                    Submission.StatusChoices.PENDING,
+                    Submission.StatusChoices.RUNNING,
+                ]
+            )
+            .values(
+                "id",
+                "title",
+                "latest_submission_status",
+            )
         )
 
         data = {
             "stats": {
-                "challenges_solved": submission["challenges_solved"],
-                "total_submissions": submission["total_submissions"],
+                "challenges_solved": stats_submission["challenges_solved"],
+                "total_submissions": stats_submission["total_submissions"],
                 "success_rate": (
                     (
                         (
-                            submission["total_submissions"]
-                            / submission["challenges_solved"]
+                            stats_submission["total_submissions"]
+                            / stats_submission["challenges_solved"]
                         )
                         * 100
                     )
-                    if submission["total_submissions"] > 0
+                    if stats_submission["total_submissions"] > 0
                     else 0.0
                 ),
             },
             "recent_submissions": SubmissionViewSerializer(
                 submission[:3], many=True
             ).data,
-            "continue_learning": ContinuLarningSerializer(continue_learning,many=True).data,
+            "continue_learning": continue_learning,
         }
+        return Response(data)
