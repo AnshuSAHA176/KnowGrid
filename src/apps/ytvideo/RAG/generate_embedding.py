@@ -11,15 +11,26 @@ from django_redis import get_redis_connection
 
 redis_client = get_redis_connection("default")
 
-RELEASE_LOCK_SCRIPT = """
+
+def splitchunks(chunks: list[str]) -> list:
+
+    result = []
+
+    for boundary in range(0, len(chunks), 40):
+        result.append(chunks[boundary : boundary + 40])
+    print(result)
+    return result
+
+
+
+
+def release_lock(lock_key: str, owner: str) -> bool:
+    RELEASE_LOCK_SCRIPT = """
 if redis.call("GET", KEYS[1]) == ARGV[1] then
     return redis.call("DEL", KEYS[1])
 end
 return 0
 """
-
-
-def release_lock(lock_key: str, owner: str) -> bool:
     return (
         redis_client.eval(
             RELEASE_LOCK_SCRIPT,
@@ -55,9 +66,7 @@ def generate_embeddings(texts: list[str]) -> list[list[float]]:
 
     lock_key = f"{cache_key}:lock"
     owner = str(uuid.uuid4())
-    get_permission = redis_client.set(
-    lock_key, owner, nx=True, ex=120
-)
+    get_permission = redis_client.set(lock_key, owner, nx=True, ex=120)
     try:
         if not get_permission:
             deadline = time.monotonic() + 180
@@ -73,8 +82,7 @@ def generate_embeddings(texts: list[str]) -> list[list[float]]:
         return call_embedding_cache(cache_key=cache_key, texts=texts)
     finally:
         if get_permission:
-            release_lock(lock_key=lock_key,owner=owner)
-
+            release_lock(lock_key=lock_key, owner=owner)
 
 
 def call_embedding_cache(cache_key, texts):

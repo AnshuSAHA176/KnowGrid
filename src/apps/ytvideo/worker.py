@@ -3,7 +3,7 @@ from django.db import transaction
 
 from .models import YtVideo, YtVideoChunks
 from .transcipts_extract import YouTubeProcessor
-from .RAG.generate_embedding import generate_embeddings
+from .RAG.generate_embedding import generate_embeddings,splitchunks
 from django.utils import timezone
 from datetime import timedelta
 
@@ -37,14 +37,22 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
         chunks = result["chunks"]
         print(len(chunks))
         chunk_texts = [chunk["text"] for chunk in chunks]
-        embeddings = generate_embeddings(chunk_texts)
+        
+        split_batches = splitchunks(chunks=chunk_texts)
+        if not split_batches:
+            return
+        embeddings = generate_embeddings(split_batches[0])
+    
+        for batch_inx in range(1,len(split_batches)):
+                embeddings.extend(generate_embeddings(split_batches[batch_inx]))
+
 
         with transaction.atomic():
             video = YtVideo.objects.select_for_update().get(youtube_id=video_id)
 
             if video.processing_token != token:
                 raise ValueError("Processing ownership lost")
-            YtVideoChunks.objects.filter(video=video).delete()
+            
 
             YtVideoChunks.objects.bulk_create(
                 [
