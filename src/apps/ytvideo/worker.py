@@ -4,6 +4,8 @@ from django.db import transaction
 from .models import YtVideo, YtVideoChunks
 from .transcipts_extract import YouTubeProcessor
 from .RAG.generate_embedding import generate_embeddings
+from django.utils import timezone
+from datetime import timedelta
 
 
 @shared_task(
@@ -13,31 +15,56 @@ from .RAG.generate_embedding import generate_embeddings
 )
 def process_youtube_video(self, video_id: str, url: str) -> dict:
     try:
-        video = YtVideo.objects.get(youtube_id=video_id)
-        video.status = YtVideo.ProcessingStatus.PROCESSING
-        video.save(update_fields=["status", "updated_at"])
+        with transaction.atomic():
+            video = YtVideo.objects.select_for_update().get(youtube_id=video_id)
+            if video.status == YtVideo.ProcessingStatus.READY:
+                return {"status": "ready"}
+
+            if video.lock_until and video.lock_until > timezone.now():
+                return {"status": "already_processing"}
+
+            video.status = YtVideo.ProcessingStatus.PROCESSING
+            video.lock_until = timezone.now() + timedelta(minutes=10)
+            video.processing_token += 1
+            token = video.processing_token
+            video.save(
+                update_fields=["status", "updated_at", "lock_until", "processing_token"]
+            )
         print(video.youtube_id)
         processor = YouTubeProcessor()
         result = processor.process(url)
-        print(result['metadata'])
+        print(result["metadata"])
         chunks = result["chunks"]
         print(len(chunks))
         chunk_texts = [chunk["text"] for chunk in chunks]
         embeddings = generate_embeddings(chunk_texts)
 
         with transaction.atomic():
-            for chunk, embedding in zip(chunks, embeddings):
-                YtVideoChunks.objects.create(
-                    video=video,
-                    text=chunk["text"],
-                    embeddings=embedding,
-                    start_time=chunk["start"],
-                    end_time=chunk["end"],
-                )
+            video = YtVideo.objects.select_for_update().get(youtube_id=video_id)
 
+            if video.processing_token != token:
+                raise ValueError("Processing ownership lost")
+            YtVideoChunks.objects.filter(video=video).delete()
+
+            YtVideoChunks.objects.bulk_create(
+                [
+            
+                       YtVideoChunks(
+                                video=video,
+                                chunk_index=index,
+                                text=chunk["text"],
+                                embeddings=embedding,
+                                start_time=chunk["start"],
+                                end_time=chunk["end"],
+                            
+                    )
+                    for index, (chunk, embedding) in enumerate(zip(chunks, embeddings))
+                ]
+            )
             video.metadata = result["metadata"]
             video.status = YtVideo.ProcessingStatus.READY
-            video.save(update_fields=["status", "updated_at", "metadata"])
+            video.lock_until = None
+            video.save(update_fields=["status", "updated_at", "metadata", "lock_until"])
         return {
             "video_id": video_id,
             "chunks_generated": len(chunks),
@@ -45,11 +72,14 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
         }
 
     except Exception as exc:
-        try:
-            video = YtVideo.objects.get(youtube_id=video_id)
-            video.status = YtVideo.ProcessingStatus.FAILED
-            video.save(update_fields=["status", "updated_at"])
-        except YtVideo.DoesNotExist:
-            pass
+        with transaction.atomic():
+            if self.request.retries >= self.max_retries:
+                video = YtVideo.objects.select_for_update().get(youtube_id=video_id)
+
+                if video.processing_token == token:
+                    video.status = YtVideo.ProcessingStatus.FAILED
+                    video.lock_until = None
+                    video.save(update_fields=["status", "lock_until", "updated_at"])
+                raise exc
 
         raise self.retry(exc=exc, countdown=2**self.request.retries)

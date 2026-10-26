@@ -19,21 +19,23 @@ class YouTubeProcessor:
 
     def extract_video_id(self, url: str) -> str:
         parsed = urlparse(url)
-        host = parsed.hostname or ""
-        video_id = ""
+        hostname = parsed.hostname or ""
 
-        if host in {"youtube.com", "www.youtube.com", "m.youtube.com"}:
-            video_id = parse_qs(parsed.query).get("v", [""])[0]
-        elif host in {"youtu.be", "www.youtu.be"}:
+        video_id = None
+
+        if hostname in ("youtube.com", "www.youtube.com", "m.youtube.com"):
+            if parsed.path == "/watch":
+                video_id = parse_qs(parsed.query).get("v", [None])[0]
+            elif parsed.path.startswith(("/live/", "/embed/", "/shorts/")):
+                video_id = parsed.path.split("/")[2]
+
+        elif hostname == "youtu.be":
             video_id = parsed.path.strip("/").split("/")[0]
-        else:
-            raise ValueError("Unsupported YouTube URL")
 
-        if len(video_id) != 11:
+        if not video_id or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
             raise ValueError("Invalid YouTube video ID")
 
         return video_id
-
     def get_video_metadata(self, url: str) -> dict:
         options = {
             "quiet": True,
@@ -150,12 +152,13 @@ class YouTubeProcessor:
             transcript["segments"],
             transcript["language"],
         )
-
+        print('saved')
+        self.save_video_data(metadata, transcript)
         print("5. Generating chunks", flush=True)
         chunks = chunking(sagments=transcript["segments"])
         print(f"5. Generated {len(chunks)} chunks", flush=True)
 
-        self.save_video_data(metadata, transcript)
+        
 
         return {
             "metadata": metadata,

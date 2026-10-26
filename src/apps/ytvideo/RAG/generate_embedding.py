@@ -1,15 +1,46 @@
 import os
 import requests
 from dotenv import load_dotenv
+from hashlib import sha256
+from django.core.cache import cache
+import time
+from django.utils import timezone
+from datetime import timedelta
+
 load_dotenv()
 
 CLOUDFLARE_ACCOUNT_ID = os.environ["CLOUDFLARE_ACCOUNT_ID"]
 CLOUDFLARE_API_TOKEN = os.environ["CLOUDFLARE_API_TOKEN"]
 
 
+def generate_hash(chunks: list[str], model=str) -> str:
+    combined_chunks = " ".join(chunks)
+    combined_data = f"{model} {combined_chunks}"
+    return sha256(combined_data.encode("utf-8")).hexdigest()
+
+
 def generate_embeddings(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
+    cache_key = generate_hash(chunks=texts[:30], model="bge-m3")
+    cache_data = cache.get(cache_key)
+
+    if cache_data:
+        return cache_data
+
+    lock_key = f"{cache_key}:lock"
+    get_permission = cache.add(lock_key, "lock", timeout=60 * 2)
+    if not get_permission:
+        end_time = timezone.now() + timedelta(minutes=3)
+        while timezone.now() < end_time:
+            cache_data = cache.get(cache_data)
+            if cache_data:
+                return cache_data
+            time.sleep(3)
+
+    cache_data = cache.get(key=cache_key)
+    if cache_data:
+        return cache_data
 
     url = (
         f"https://api.cloudflare.com/client/v4/accounts/"
@@ -36,14 +67,12 @@ def generate_embeddings(texts: list[str]) -> list[list[float]]:
 
     if len(embeddings) != len(texts):
         raise RuntimeError("Embedding count does not match input count")
+    cache.set(key=cache_key, value=embeddings, timeout=60 * 30)
 
     return embeddings
 
 
-
-
-
-def user_embedding_generator(user_query:str) -> list[float]:
+def user_embedding_generator(user_query: str) -> list[float]:
 
     url = (
         f"https://api.cloudflare.com/client/v4/accounts/"
