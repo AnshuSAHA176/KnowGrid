@@ -6,7 +6,10 @@ from django.core.cache import cache
 import time
 from django.utils import timezone
 from datetime import timedelta
+import uuid
+from django_redis import get_redis_connection
 
+redis_client = get_redis_connection("default")
 load_dotenv()
 
 CLOUDFLARE_ACCOUNT_ID = os.environ["CLOUDFLARE_ACCOUNT_ID"]
@@ -22,22 +25,32 @@ def generate_hash(chunks: list[str], model=str) -> str:
 def generate_embeddings(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
-    cache_key = generate_hash(chunks=texts[:30], model="bge-m3")
+    cache_key = generate_hash(chunks=texts, model="bge-m3")
     cache_data = cache.get(cache_key)
 
     if cache_data:
         return cache_data
 
     lock_key = f"{cache_key}:lock"
-    get_permission = cache.add(lock_key, "lock", timeout=60 * 2)
-    if not get_permission:
-        end_time = timezone.now() + timedelta(minutes=3)
-        while timezone.now() < end_time:
-            cache_data = cache.get(cache_data)
-            if cache_data:
-                return cache_data
-            time.sleep(3)
+    owner = uuid.uuid4()
+    get_permission = cache.add(lock_key, owner, timeout=60 * 2)
+    try:
+        if not get_permission:
+            deadline = time.monotonic() + 180
+            while time.monotonic() < deadline:
+                cache_data = cache.get(cache_key)
+                if cache_data:
+                    return cache_data
+                if cache.add(lock_key, owner, timeout=60 * 3):
+                    return call_embedding_cache(cache_key=cache_key,texts=texts)
+                time.sleep(4)
+            raise TimeoutError("Embedding generation timed out")
+        return call_embedding_cache(cache_key=cache_key,texts=texts)
+    finally:
+        if cache.get(lock_key) == owner:
+            cache.delete(lock_key)
 
+def call_embedding_cache(cache_key, texts):
     cache_data = cache.get(key=cache_key)
     if cache_data:
         return cache_data
@@ -68,7 +81,6 @@ def generate_embeddings(texts: list[str]) -> list[list[float]]:
     if len(embeddings) != len(texts):
         raise RuntimeError("Embedding count does not match input count")
     cache.set(key=cache_key, value=embeddings, timeout=60 * 30)
-
     return embeddings
 
 
