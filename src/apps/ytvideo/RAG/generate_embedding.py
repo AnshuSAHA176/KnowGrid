@@ -10,7 +10,29 @@ import uuid
 from django_redis import get_redis_connection
 
 redis_client = get_redis_connection("default")
+
+RELEASE_LOCK_SCRIPT = """
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+    return redis.call("DEL", KEYS[1])
+end
+return 0
+"""
+
+
+def release_lock(lock_key: str, owner: str) -> bool:
+    return (
+        redis_client.eval(
+            RELEASE_LOCK_SCRIPT,
+            1,
+            lock_key,
+            owner,
+        )
+        == 1
+    )
+
+
 load_dotenv()
+
 
 CLOUDFLARE_ACCOUNT_ID = os.environ["CLOUDFLARE_ACCOUNT_ID"]
 CLOUDFLARE_API_TOKEN = os.environ["CLOUDFLARE_API_TOKEN"]
@@ -28,31 +50,37 @@ def generate_embeddings(texts: list[str]) -> list[list[float]]:
     cache_key = generate_hash(chunks=texts, model="bge-m3")
     cache_data = cache.get(cache_key)
 
-    if cache_data:
+    if cache_data is not None:
         return cache_data
 
     lock_key = f"{cache_key}:lock"
-    owner = uuid.uuid4()
-    get_permission = cache.add(lock_key, owner, timeout=60 * 2)
+    owner = str(uuid.uuid4())
+    get_permission = redis_client.set(
+    lock_key, owner, nx=True, ex=120
+)
     try:
         if not get_permission:
             deadline = time.monotonic() + 180
             while time.monotonic() < deadline:
                 cache_data = cache.get(cache_key)
-                if cache_data:
+                if cache_data is not None:
                     return cache_data
-                if cache.add(lock_key, owner, timeout=60 * 3):
-                    return call_embedding_cache(cache_key=cache_key,texts=texts)
+                if redis_client.set(lock_key, owner, nx=True, ex=180):
+                    get_permission = True
+                    return call_embedding_cache(cache_key=cache_key, texts=texts)
                 time.sleep(4)
             raise TimeoutError("Embedding generation timed out")
-        return call_embedding_cache(cache_key=cache_key,texts=texts)
+        return call_embedding_cache(cache_key=cache_key, texts=texts)
     finally:
-        if cache.get(lock_key) == owner:
-            cache.delete(lock_key)
+        if get_permission:
+            release_lock(lock_key=lock_key,owner=owner)
+
+
 
 def call_embedding_cache(cache_key, texts):
-    cache_data = cache.get(key=cache_key)
-    if cache_data:
+    print("CLOUDFLARE API CALLED")
+    cache_data = cache.get(cache_key)
+    if cache_data is not None:
         return cache_data
 
     url = (
