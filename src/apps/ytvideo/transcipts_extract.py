@@ -118,23 +118,6 @@ class YouTubeProcessor:
 
         return normalized
 
-    def save_video_data(self, metadata: dict, transcript: dict) -> Path:
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-
-        video_id = metadata["video_id"]
-        output_path = self.output_dir / f"{video_id}.json"
-
-        output_path.write_text(
-            json.dumps(
-                {"metadata": metadata, "transcript": transcript},
-                ensure_ascii=False,
-                indent=2,
-            ),
-            encoding="utf-8",
-        )
-
-        return output_path
-
     def process(self, url: str) -> dict:
         print("1. Extracting video ID", flush=True)
         video_id = self.extract_video_id(url)
@@ -152,8 +135,8 @@ class YouTubeProcessor:
             transcript["segments"],
             transcript["language"],
         )
-        print('saved')
-        self.save_video_data(metadata, transcript)
+       
+      
         print("5. Generating chunks", flush=True)
         chunks = chunking(sagments=transcript["segments"])
         print(f"5. Generated {len(chunks)} chunks", flush=True)

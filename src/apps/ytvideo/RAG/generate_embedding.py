@@ -18,7 +18,7 @@ def splitchunks(chunks: list[str]) -> list:
 
     for boundary in range(0, len(chunks), 40):
         result.append(chunks[boundary : boundary + 40])
-    print(result)
+    
     return result
 
 
@@ -95,8 +95,10 @@ def call_embedding_cache(cache_key, texts):
         f"https://api.cloudflare.com/client/v4/accounts/"
         f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/baai/bge-m3"
     )
-
+    if os.getenv("TEST_EMBEDDING_FAILURE") == "1":
+            raise requests.ConnectionError("TEST: Cloudflare unavailable")
     response = requests.post(
+
         url,
         headers={
             "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",

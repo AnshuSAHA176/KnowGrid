@@ -88,7 +88,7 @@ DATABASES = {
         "USER": "knowgrid_user",
         "PASSWORD": "change_this_password",
         "HOST": "127.0.0.1",
-        "PORT": 5433,
+        "PORT": 5432,
     }
 }
 
@@ -157,14 +157,14 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
 }
 
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/1"
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/1"
+CELERY_BROKER_URL = "redis://127.0.0.1:6378/1"
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6378/1"
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("127.0.0.1", 6378)],
         },
     },
 }
@@ -172,7 +172,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis://127.0.0.1:6378/1",                     #my-redis
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },

@@ -1,6 +1,6 @@
 
 import numpy as np
-from .generate_embedding import generate_embeddings
+from .generate_embedding import generate_embeddings,splitchunks
 
 
 def chunking(sagments: list[dict]) -> list[dict]:
@@ -20,7 +20,11 @@ def chunking(sagments: list[dict]) -> list[dict]:
         }]
 
     texts = [segment["text"] for segment in sagments]
-    sagments_embeddings = generate_embeddings(texts)
+    
+    sagments_embeddings = []
+
+    for batch in splitchunks(texts):
+        sagments_embeddings.extend(generate_embeddings(batch))
 
     sentence_embeddings = np.array(
         sagments_embeddings,
