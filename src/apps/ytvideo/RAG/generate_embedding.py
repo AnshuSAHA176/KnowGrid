@@ -4,10 +4,13 @@ from dotenv import load_dotenv
 from hashlib import sha256
 from django.core.cache import cache
 import time
-from django.utils import timezone
-from datetime import timedelta
+
 import uuid
 from django_redis import get_redis_connection
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 redis_client = get_redis_connection("default")
 
@@ -18,10 +21,8 @@ def splitchunks(chunks: list[str]) -> list:
 
     for boundary in range(0, len(chunks), 40):
         result.append(chunks[boundary : boundary + 40])
-    
+
     return result
-
-
 
 
 def release_lock(lock_key: str, owner: str) -> bool:
@@ -40,6 +41,67 @@ return 0
         )
         == 1
     )
+
+
+TOKEN_BUCKET_SCRIPT = """
+local capacity = tonumber(ARGV[1])
+local refill_rate = tonumber(ARGV[2])
+
+local tokens = tonumber(redis.call("HGET", KEYS[1], "tokens"))
+local last_refill = tonumber(redis.call("HGET", KEYS[1], "last_refill"))
+local time_parts = redis.call("TIME")
+local now = tonumber(time_parts[1]) + tonumber(time_parts[2]) / 1000000
+
+if tokens == nil or last_refill == nil then
+    tokens = capacity
+    last_refill = now
+end
+
+
+local elapsed = math.max(0, now - last_refill)
+tokens = math.min(capacity, tokens + elapsed * refill_rate)
+last_refill = now
+
+local allowed = 0
+local wait_time = 0
+
+if tokens>=1 then
+    tokens=tokens-1
+    allowed = 1
+else 
+    allowed = 0
+    wait_time = math.ceil(((1 - tokens) / refill_rate) * 1000)
+end
+
+redis.call(
+    "HSET", KEYS[1],
+    "tokens", tokens,
+    "last_refill", last_refill
+)
+
+redis.call("EXPIRE", KEYS[1], 3600)
+
+return {allowed, wait_time}
+
+"""
+
+
+def token_bucket_check():
+    try:
+        result = redis_client.eval(
+            TOKEN_BUCKET_SCRIPT,
+            1,
+            "bucket:embedding",
+            10,
+            10,
+        )
+
+        allowed, wait_time = result
+        return bool(allowed), wait_time
+
+    except Exception as exc:
+        logger.warning("Rate limiter unavailable: %s", exc)
+        return True, 0
 
 
 load_dotenv()
@@ -95,10 +157,15 @@ def call_embedding_cache(cache_key, texts):
         f"https://api.cloudflare.com/client/v4/accounts/"
         f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/baai/bge-m3"
     )
-    if os.getenv("TEST_EMBEDDING_FAILURE") == "1":
-            raise requests.ConnectionError("TEST: Cloudflare unavailable")
-    response = requests.post(
+    while True:
+        allowed, wait_time = token_bucket_check()
 
+        if allowed:
+            break
+
+        time.sleep(wait_time / 1000)
+
+    response = requests.post(
         url,
         headers={
             "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
