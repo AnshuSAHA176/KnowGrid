@@ -6,6 +6,7 @@ from .transcipts_extract import YouTubeProcessor
 from .RAG.generate_embedding import generate_embeddings, splitchunks
 from django.utils import timezone
 from datetime import timedelta
+from .services import release_slot
 
 
 class ApplicationError(Exception):
@@ -48,7 +49,7 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
         print(video.youtube_id)
         processor = YouTubeProcessor()
         result = processor.process(url)
-        
+
         chunks = result["chunks"]
         print(len(chunks))
         chunk_texts = [chunk["text"] for chunk in chunks]
@@ -60,7 +61,6 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
 
         for batch_inx in range(1, len(split_batches)):
             embeddings.extend(generate_embeddings(split_batches[batch_inx]))
-    
 
         with transaction.atomic():
             video = YtVideo.objects.select_for_update().get(youtube_id=video_id)
@@ -84,7 +84,10 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
             video.metadata = result["metadata"]
             video.status = YtVideo.ProcessingStatus.READY
             video.lock_until = None
+            should_release_slot = True
             video.save(update_fields=["status", "updated_at", "metadata", "lock_until"])
+        if should_release_slot:
+            print(release_slot(video_id))
         return {
             "video_id": video_id,
             "chunks_generated": len(chunks),
@@ -103,12 +106,14 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
                 if self.request.retries >= self.max_retries:
                     video.status = YtVideo.ProcessingStatus.FAILED
                     save_fields.append("status")
+                    should_release_slot = True
                 video.save(update_fields=save_fields)
         if ownership_lost:
             raise TaskProcessingError(
                 message="worker loos ownership",
             )
-
+        if should_release_slot and  not ownership_lost:
+            print(release_slot(video_id))
         if self.request.retries >= self.max_retries:
             raise exc
 

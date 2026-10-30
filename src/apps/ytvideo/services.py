@@ -1,6 +1,9 @@
 from django_redis import get_redis_connection
+import logging
 
 redis_client = get_redis_connection('default')
+
+logger = logging.getLogger(__name__)
 
 
 MAX_PENDING_JOBS = 500
@@ -74,12 +77,17 @@ return "job_removed"
 
 
 def release_slot(job_id:str):
-    result = redis_client.eval(
-        RELEASE_RESERVATION_SCRIPT,
-        2,
-        JOB_IDS,
-        SLOT,
-        job_id
+    try:
 
-    )
-    return result.decode() if isinstance(result,bytes) else result
+        result = redis_client.eval(
+            RELEASE_RESERVATION_SCRIPT,
+            2,
+            JOB_IDS,
+            SLOT,
+            job_id
+
+        )
+        return result.decode() if isinstance(result,bytes) else result
+    except Exception as exc:
+        
+        logger.warning("Relese slot unavalable unavailable: %s", exc)
