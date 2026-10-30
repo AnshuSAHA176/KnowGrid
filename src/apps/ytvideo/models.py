@@ -2,7 +2,7 @@ from django.db import models
 from pgvector.django import VectorField
 from django.conf import settings
 import uuid
-
+from django.utils import timezone
 
 class YtVideo(models.Model):
     class ProcessingStatus(models.TextChoices):
@@ -76,3 +76,31 @@ class Conversation(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["user", "video"], name="user_video_idx")]
+
+
+class OutboxEvent(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        PROCESSING = "PROCESSING", "Processing"
+        PUBLISHED = "PUBLISHED", "Published"
+        FAILED = "FAILED", "Failed"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event_type = models.CharField(max_length=100)
+    aggregate_id = models.UUIDField(max_length=100, blank=True)
+    payload = models.JSONField(default=dict)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    attempts = models.PositiveIntegerField(default=0)
+    last_error = models.TextField(null=True, blank=True)
+    available_at = models.DateTimeField(default=timezone.now)
+    processing_token = models.UUIDField(null=True, blank=True)
+    lock_until = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [
+            models.Index(fields=["status", "available_at"]),
+            models.Index(fields=["status", "lock_until"]),
+        ]
