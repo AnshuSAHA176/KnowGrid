@@ -30,6 +30,8 @@ class TaskProcessingError(ApplicationError):
 )
 def process_youtube_video(self, video_id: str, url: str) -> dict:
     token = None
+    ownership_lost = False
+    should_release_slot=False
     try:
         with transaction.atomic():
             video = YtVideo.objects.select_for_update().get(youtube_id=video_id)
@@ -95,7 +97,7 @@ def process_youtube_video(self, video_id: str, url: str) -> dict:
         }
 
     except Exception as exc:
-        ownership_lost = False
+        
         with transaction.atomic():
             video = YtVideo.objects.select_for_update().get(youtube_id=video_id)
             if token is not None and video.processing_token != token:

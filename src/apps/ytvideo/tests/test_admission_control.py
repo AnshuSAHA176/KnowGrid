@@ -1,12 +1,11 @@
-
 from django.test import TestCase
 from django_redis import get_redis_connection
 
-from apps.ytvideo.services import check_slot, release_slot
-from apps.ytvideo.services import MAX_PENDING_JOBS
+from apps.ytvideo.services import check_slot, release_slot, MAX_PENDING_JOBS
 
 
 class AdmissionControlTests(TestCase):
+
     def setUp(self):
         self.redis = get_redis_connection("default")
         self.counter_key = "admission:video"
@@ -35,7 +34,6 @@ class AdmissionControlTests(TestCase):
         self.redis.hset(self.counter_key, "slot", MAX_PENDING_JOBS)
 
         result = check_slot("test_video_3")
-
         self.assertEqual(result, "capacity_full")
 
     def test_release_removes_reservation_and_decrements_slot(self):
@@ -45,8 +43,7 @@ class AdmissionControlTests(TestCase):
 
         self.assertEqual(result, "job_removed")
         self.assertEqual(
-            int(self.redis.hget(self.counter_key, "slot")),
-            0,
+            int(self.redis.hget(self.counter_key, "slot")), 0
         )
         self.assertFalse(
             self.redis.sismember(self.reserved_key, "test_video_4")
@@ -61,6 +58,5 @@ class AdmissionControlTests(TestCase):
         self.assertEqual(first, "job_removed")
         self.assertEqual(second, "job_id_not_in_queue")
         self.assertEqual(
-            int(self.redis.hget(self.counter_key, "slot")),
-            0,
+            int(self.redis.hget(self.counter_key, "slot")), 0
         )
