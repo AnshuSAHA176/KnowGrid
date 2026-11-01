@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import YtVideo, YtVideoChunks
+from .models import YtVideo, YtVideoChunks,OutboxEvent
 from .transcipts_extract import YouTubeProcessor
 from django.db import transaction
 from .worker import process_youtube_video
@@ -33,27 +33,34 @@ class VideoCreateSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        aprroval = check_slot(validated_data["url_id"])
-        if aprroval != "accepted":
+        approval = check_slot(validated_data["url_id"])
+
+        if approval != "accepted":
             raise serializers.ValidationError(
-                "No worker is free Please try after some time"
+                "No worker is free. Please try again later."
             )
+
         try:
             with transaction.atomic():
-
                 yt_video = YtVideo.objects.create(
-                    youtube_id=validated_data["url_id"], user=validated_data["user"]
+                    youtube_id=validated_data["url_id"],
+                    user=validated_data["user"],
                 )
-                transaction.on_commit(
-                    lambda: process_youtube_video.delay(
-                        video_id=yt_video.youtube_id, url=validated_data["url"]
-                    )
-                )
-        except Exception:
-            print(release_slot(job_id=validated_data["url_id"]))
-            raise
-        return yt_video
 
+                OutboxEvent.objects.create(
+                    event_type="VIDEO_PROCESS_REQUESTED",
+                    aggregate_id=yt_video.youtube_id,
+                    payload={
+                        "video_id": yt_video.youtube_id,
+                        "url": validated_data["url"],
+                    },
+                )
+
+        except Exception:
+            release_slot(job_id=validated_data["url_id"])
+            raise
+
+        return yt_video
 
 class VideoTitleSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source="user.email")

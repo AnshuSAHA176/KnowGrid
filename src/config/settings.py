@@ -178,3 +178,11 @@ CACHES = {
         },
     }
 }
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "dispatch-outbox-every-5-minutes": {
+        "task": "apps.ytvideo.tasks.dispatch_outbox_events",
+        "schedule": crontab(minute="*/5"),
+    },
+}
